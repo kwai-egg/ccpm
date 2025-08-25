@@ -1,6 +1,6 @@
 #!/bin/bash
-# Script: update.sh
-# Purpose: Main Claude Code PM update implementation
+# Script: update.sh (rewritten for non-git .claude folders)
+# Purpose: Main Claude Code PM update implementation using GitHub API
 # Usage: ./update.sh [--dry-run] [--force] [--no-backup]
 
 set -e  # Exit on error
@@ -8,7 +8,7 @@ set -u  # Error on undefined variables
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+PROJECT_ROOT="$(pwd)"
 CONFIG_FILE="$PROJECT_ROOT/.claude-pm.yaml"
 VERSION_FILE="$PROJECT_ROOT/.claude/VERSION"
 
@@ -38,68 +38,35 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-NC='\033[0m' # No Color
-
-# Function to display colored output
-function log() {
-    local color=$1
-    local message=$2
-    echo -e "${color}${message}${NC}"
-}
-
-function error_exit() {
-    log $RED "❌ Error: $1"
-    exit 1
-}
-
-function success() {
-    log $GREEN "✅ $1"
-}
-
-function info() {
-    log $BLUE "ℹ️  $1"
-}
-
-function warning() {
-    log $YELLOW "⚠️  $1"
-}
-
-function header() {
-    log $BOLD "$1"
-}
-
-function dry_run_info() {
-    if [[ "$DRY_RUN" == true ]]; then
-        log $CYAN "🔍 [DRY RUN] $1"
-    fi
-}
+# Source GitHub utilities
+source "$SCRIPT_DIR/github-utils.sh"
 
 # Validate environment
 function validate_environment() {
-    # Check if we're in a git repository
-    if ! git rev-parse --git-dir >/dev/null 2>&1; then
-        error_exit "Not in a git repository"
+    # Check if .claude directory exists
+    if [[ ! -d "$PROJECT_ROOT/.claude" ]]; then
+        error_exit "Claude Code PM not found (.claude directory missing)"
     fi
 
-    # Check for uncommitted changes (unless forced)
-    if [[ "$FORCE" != true ]] && ! git diff-index --quiet HEAD --; then
-        error_exit "Uncommitted changes detected. Commit changes, stash them, or use --force"
+    # Check for uncommitted git changes if in a git repo (optional warning)
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        if [[ "$FORCE" != true ]] && ! git diff-index --quiet HEAD --; then
+            warning "You have uncommitted git changes. Consider committing them first."
+            if [[ "$DRY_RUN" != true ]]; then
+                read -p "Continue anyway? [y/N]: " -n 1 -r
+                echo
+                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    info "Update cancelled"
+                    exit 0
+                fi
+            fi
+        fi
     fi
 
     # Check if config file exists
     if [[ ! -f "$CONFIG_FILE" ]]; then
-        error_exit "Configuration file not found: $CONFIG_FILE. Run '/pm:init' first"
+        error_exit "Configuration file not found: $CONFIG_FILE. Run '/pm:update-init' first"
     fi
-
-    # Check dependencies
-    command -v git >/dev/null || error_exit "Git not installed"
 }
 
 # Parse configuration
@@ -108,26 +75,11 @@ function read_config() {
         # Use yq if available
         UPSTREAM_URL=$(yq eval '.upstream' "$CONFIG_FILE")
         UPSTREAM_BRANCH=$(yq eval '.branch // "main"' "$CONFIG_FILE")
-        
-        # Read preserve and update patterns
-        readarray -t PRESERVE_PATTERNS < <(yq eval '.preserve[]' "$CONFIG_FILE")
-        readarray -t UPDATE_PATTERNS < <(yq eval '.update[]' "$CONFIG_FILE")
-        readarray -t THEIRS_PATTERNS < <(yq eval '.merge_strategy.theirs[]' "$CONFIG_FILE" 2>/dev/null || echo "")
-        readarray -t OURS_PATTERNS < <(yq eval '.merge_strategy.ours[]' "$CONFIG_FILE" 2>/dev/null || echo "")
     else
         # Fallback parsing
         UPSTREAM_URL=$(grep -E "^upstream:" "$CONFIG_FILE" | sed 's/upstream: *//' | tr -d '"' | tr -d "'")
         UPSTREAM_BRANCH=$(grep -E "^branch:" "$CONFIG_FILE" | sed 's/branch: *//' | tr -d '"' | tr -d "'" || echo "main")
         UPSTREAM_BRANCH=${UPSTREAM_BRANCH:-main}
-        
-        # Parse arrays (simplified)
-        PRESERVE_PATTERNS=()
-        UPDATE_PATTERNS=()
-        THEIRS_PATTERNS=()
-        OURS_PATTERNS=()
-        
-        # This is basic parsing - yq is recommended for complex YAML
-        warning "Using basic YAML parsing. Install 'yq' for better configuration support"
     fi
     
     if [[ -z "$UPSTREAM_URL" ]]; then
@@ -137,40 +89,11 @@ function read_config() {
     info "Upstream: $UPSTREAM_URL (branch: $UPSTREAM_BRANCH)"
 }
 
-# Setup upstream remote
-function setup_upstream() {
-    local remote_name="ccpm-upstream"
-    
-    # Check if upstream remote already exists
-    if git remote get-url "$remote_name" >/dev/null 2>&1; then
-        local existing_url=$(git remote get-url "$remote_name")
-        if [[ "$existing_url" != "$UPSTREAM_URL" ]]; then
-            info "Updating upstream remote URL"
-            if [[ "$DRY_RUN" != true ]]; then
-                git remote set-url "$remote_name" "$UPSTREAM_URL"
-            fi
-        fi
-    else
-        info "Adding upstream remote: $UPSTREAM_URL"
-        if [[ "$DRY_RUN" != true ]]; then
-            git remote add "$remote_name" "$UPSTREAM_URL"
-        fi
-    fi
-    
-    # Fetch latest from upstream
-    info "Fetching latest updates from upstream..."
-    if [[ "$DRY_RUN" != true ]]; then
-        git fetch "$remote_name" "$UPSTREAM_BRANCH" --quiet || error_exit "Failed to fetch from upstream"
-    else
-        dry_run_info "Would fetch from $remote_name/$UPSTREAM_BRANCH"
-    fi
-    
-    UPSTREAM_REMOTE="$remote_name"
-    UPSTREAM_REF="$remote_name/$UPSTREAM_BRANCH"
-}
-
 # Check if update is needed
 function check_update_needed() {
+    # Initialize GitHub utilities
+    init_github_utils "$UPSTREAM_URL" "$UPSTREAM_BRANCH"
+    
     # Get version information
     if [[ -f "$VERSION_FILE" ]]; then
         CURRENT_VERSION=$(cat "$VERSION_FILE" | tr -d '\n' | tr -d '\r')
@@ -179,21 +102,40 @@ function check_update_needed() {
     fi
     
     # Get upstream version
-    local upstream_version_file="$UPSTREAM_REF:.claude/VERSION"
-    if git show "$upstream_version_file" >/dev/null 2>&1; then
-        UPSTREAM_VERSION=$(git show "$upstream_version_file" 2>/dev/null | tr -d '\n' | tr -d '\r')
-    else
-        UPSTREAM_VERSION="unknown"
+    UPSTREAM_VERSION=$(get_remote_version "$UPSTREAM_BRANCH")
+    if [[ $? -ne 0 || -z "$UPSTREAM_VERSION" ]]; then
+        error_exit "Could not fetch upstream version"
     fi
     
     info "Current version: $CURRENT_VERSION"
     info "Upstream version: $UPSTREAM_VERSION"
     
-    # Check if versions are the same
+    # Check if versions are the same and no file differences
     if [[ "$CURRENT_VERSION" == "$UPSTREAM_VERSION" && "$CURRENT_VERSION" != "unknown" ]]; then
         # Still check for file differences in case of same version but different files
-        local changed_files=$(git diff --name-only "HEAD" "$UPSTREAM_REF" 2>/dev/null || true)
-        if [[ -z "$changed_files" ]]; then
+        local files_need_update=false
+        
+        # Get list of remote files to check
+        local remote_files
+        remote_files=$(fetch_github_tree_recursive ".claude" "$UPSTREAM_BRANCH")
+        if [[ $? -eq 0 ]]; then
+            while IFS= read -r remote_file; do
+                [[ -z "$remote_file" ]] && continue
+                
+                if should_update_file "$remote_file"; then
+                    local remote_content
+                    remote_content=$(fetch_github_file "$remote_file" "$UPSTREAM_BRANCH")
+                    if [[ $? -eq 0 ]]; then
+                        if ! compare_file_checksums "$remote_file" "$remote_content"; then
+                            files_need_update=true
+                            break
+                        fi
+                    fi
+                fi
+            done <<< "$remote_files"
+        fi
+        
+        if [[ "$files_need_update" == false ]]; then
             success "Already up to date (version $CURRENT_VERSION)"
             exit 0
         else
@@ -223,95 +165,112 @@ function create_backup() {
     success "Backup created: $backup_name"
 }
 
-# Apply selective merge based on patterns
-function apply_selective_merge() {
-    header "📦 Applying selective merge..."
+# Apply file updates from upstream
+function apply_file_updates() {
+    header "📦 Applying file updates from upstream..."
     
-    # Get list of changed files
-    local changed_files=($(git diff --name-only "HEAD" "$UPSTREAM_REF" 2>/dev/null || true))
-    
-    if [[ ${#changed_files[@]} -eq 0 ]]; then
-        success "No files to merge"
-        return
+    # Get list of remote files
+    local remote_files
+    remote_files=$(fetch_github_tree_recursive ".claude" "$UPSTREAM_BRANCH")
+    if [[ $? -ne 0 ]]; then
+        error_exit "Could not fetch remote file list"
     fi
     
-    info "Files changed in upstream: ${#changed_files[@]}"
+    local update_count=0
+    local preserve_count=0
+    local error_count=0
     
-    # Process each file according to merge strategy
-    for file in "${changed_files[@]}"; do
-        local merge_strategy="merge"  # default
+    # Create temporary backup directory for this update
+    local temp_backup_dir=".ccpm-backups/temp-$(date -u +%Y%m%d-%H%M%S)"
+    mkdir -p "$temp_backup_dir"
+    
+    # Process each file
+    while IFS= read -r remote_file; do
+        [[ -z "$remote_file" ]] && continue
         
-        # Check if file matches any pattern
-        for pattern in "${THEIRS_PATTERNS[@]:-}"; do
-            if [[ "$file" == $pattern || "$file" == ${pattern%/}/* ]]; then
-                merge_strategy="theirs"
-                break
-            fi
-        done
+        local local_file="$remote_file"
+        local action="skip"
         
-        if [[ "$merge_strategy" == "merge" ]]; then
-            for pattern in "${OURS_PATTERNS[@]:-}"; do
-                if [[ "$file" == $pattern || "$file" == ${pattern%/}/* ]]; then
-                    merge_strategy="ours"
-                    break
+        # Determine what to do with this file
+        if should_preserve_file "$remote_file"; then
+            action="preserve"
+            preserve_count=$((preserve_count + 1))
+        elif should_update_file "$remote_file"; then
+            # Check if file actually needs updating
+            local remote_content
+            remote_content=$(fetch_github_file "$remote_file" "$UPSTREAM_BRANCH")
+            if [[ $? -eq 0 ]]; then
+                if [[ ! -f "$local_file" ]] || ! compare_file_checksums "$local_file" "$remote_content"; then
+                    action="update"
+                else
+                    action="unchanged"
                 fi
-            done
+            else
+                action="error"
+                error_count=$((error_count + 1))
+            fi
         fi
         
-        # Apply merge strategy
-        case "$merge_strategy" in
-            "theirs")
-                info "📝 Updating: $file (upstream version)"
+        # Perform action
+        case "$action" in
+            "update")
+                info "📝 Updating: $local_file"
                 if [[ "$DRY_RUN" != true ]]; then
-                    # Use upstream version
-                    git show "$UPSTREAM_REF:$file" > "$file" 2>/dev/null || warning "Could not update $file"
-                else
-                    dry_run_info "Would update $file with upstream version"
-                fi
-                ;;
-            "ours")
-                info "🔒 Preserving: $file (local version)"
-                # Keep local version (do nothing)
-                ;;
-            "merge")
-                info "🔄 Merging: $file (attempting automatic merge)"
-                if [[ "$DRY_RUN" != true ]]; then
-                    # Attempt to merge file (this is complex, simplified here)
-                    if git show "$UPSTREAM_REF:$file" >/dev/null 2>&1; then
-                        # File exists in upstream, try to merge
-                        # This is a simplified merge - in practice, this would need more sophisticated logic
-                        git show "$UPSTREAM_REF:$file" > "$file.upstream" 2>/dev/null || true
-                        if [[ -f "$file.upstream" ]]; then
-                            info "  Manual merge may be needed for $file"
-                            # In a real implementation, you'd use a proper merge tool
-                            mv "$file.upstream" "$file" 2>/dev/null || true
-                        fi
+                    # Backup existing file
+                    if [[ -f "$local_file" ]]; then
+                        mkdir -p "$temp_backup_dir/$(dirname "$local_file")"
+                        cp "$local_file" "$temp_backup_dir/$local_file" 2>/dev/null || true
                     fi
+                    
+                    # Ensure directory exists
+                    mkdir -p "$(dirname "$local_file")"
+                    
+                    # Write new content
+                    echo "$remote_content" > "$local_file"
+                    update_count=$((update_count + 1))
                 else
-                    dry_run_info "Would attempt to merge $file"
+                    dry_run_info "Would update $local_file"
                 fi
+                ;;
+            "preserve")
+                info "🔒 Preserving: $local_file"
+                ;;
+            "unchanged")
+                info "➡️  Unchanged: $local_file"
+                ;;
+            "error")
+                warning "❌ Error fetching: $local_file"
                 ;;
         esac
-    done
+    done <<< "$remote_files"
+    
+    info "📊 Update summary: $update_count updated, $preserve_count preserved, $error_count errors"
+    
+    if [[ $error_count -gt 0 ]]; then
+        warning "Some files could not be updated due to errors"
+    fi
 }
 
-# Update system files directly
-function update_system_files() {
-    header "🔧 Updating system files..."
+# Update root-level files (README, LICENSE, etc.)
+function update_root_files() {
+    header "📄 Checking root-level files..."
     
-    # Update core system files that should always be updated
-    local system_files=(
-        ".claude/VERSION"
-        ".claude/CHANGELOG.md"
-    )
+    # List of root files that might need updating
+    local root_files=("README.md" "LICENSE" "AGENTS.md" "COMMANDS.md" "screenshot.webp")
     
-    for file in "${system_files[@]}"; do
-        if git show "$UPSTREAM_REF:$file" >/dev/null 2>&1; then
-            info "📝 Updating: $file"
-            if [[ "$DRY_RUN" != true ]]; then
-                git show "$UPSTREAM_REF:$file" > "$file" 2>/dev/null || warning "Could not update $file"
-            else
-                dry_run_info "Would update $file"
+    for file in "${root_files[@]}"; do
+        if should_update_file "$file"; then
+            local remote_content
+            remote_content=$(fetch_github_file "$file" "$UPSTREAM_BRANCH")
+            if [[ $? -eq 0 ]]; then
+                if [[ ! -f "$file" ]] || ! compare_file_checksums "$file" "$remote_content"; then
+                    info "📝 Updating root file: $file"
+                    if [[ "$DRY_RUN" != true ]]; then
+                        echo "$remote_content" > "$file"
+                    else
+                        dry_run_info "Would update $file"
+                    fi
+                fi
             fi
         fi
     done
@@ -333,9 +292,6 @@ function validate_update() {
             error_exit "Critical file/directory missing after update: $file"
         fi
     done
-    
-    # Update git index
-    git add -A >/dev/null 2>&1 || true
     
     success "Update validation passed"
 }
@@ -379,15 +335,12 @@ function main() {
         header "🚀 Claude Code PM Update"
     fi
     
-    cd "$PROJECT_ROOT" || error_exit "Could not change to project root"
-    
     validate_environment
     read_config
-    setup_upstream
     check_update_needed
     create_backup
-    apply_selective_merge
-    update_system_files
+    apply_file_updates
+    update_root_files
     validate_update
     show_summary
 }

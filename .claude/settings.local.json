@@ -35,7 +35,9 @@
       "WebSearch",
       "Bash(chmod:*)",
       "Bash(bash:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(source:*)",
+      "Bash(init_github_utils \"https://github.com/kwai-egg/ccpm.git\" \"main\")"
     ]
   }
 }

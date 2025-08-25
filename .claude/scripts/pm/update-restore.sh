@@ -1,6 +1,6 @@
 #!/bin/bash
-# Script: update-restore.sh
-# Purpose: Restore from Claude Code PM backup
+# Script: update-restore.sh (rewritten for non-git .claude folders)
+# Purpose: Restore from Claude Code PM backup (file-based)
 # Usage: ./update-restore.sh [backup-name]
 
 set -e  # Exit on error
@@ -8,8 +8,7 @@ set -u  # Error on undefined variables
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
-CONFIG_FILE="$PROJECT_ROOT/.claude-pm.yaml"
+PROJECT_ROOT="$(pwd)"
 BACKUP_DIR="$PROJECT_ROOT/.ccpm-backups"
 
 # Colors for output
@@ -60,18 +59,20 @@ function show_usage() {
     echo ""
     echo "Available backups:"
     
-    # List git backup branches
-    echo ""
-    echo "Git branches:"
-    git branch | grep "ccpm-backup-" | sed 's/^[* ] /  /' || echo "  (no backup branches found)"
-    
     # List backup directories
     echo ""
     echo "File backups:"
     if [[ -d "$BACKUP_DIR" ]]; then
-        ls -1t "$BACKUP_DIR" | grep "^backup-" | sed 's/^/  /' || echo "  (no backup directories found)"
+        ls -1t "$BACKUP_DIR" 2>/dev/null | grep "^backup-" | head -10 | sed 's/^/  /' || echo "  (no backup directories found)"
     else
         echo "  (no backup directory found)"
+    fi
+    
+    # Show git tags if in git repo
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        echo ""
+        echo "Git tags:"
+        git tag -l "ccmp-backup-*" 2>/dev/null | tail -10 | sed 's/^/  /' || echo "  (no backup tags found)"
     fi
     
     exit 1
@@ -79,14 +80,16 @@ function show_usage() {
 
 # Validate environment
 function validate_environment() {
-    # Check if we're in a git repository
-    if ! git rev-parse --git-dir >/dev/null 2>&1; then
-        error_exit "Not in a git repository"
+    # Check if .claude directory exists
+    if [[ ! -d "$PROJECT_ROOT/.claude" ]]; then
+        error_exit "Claude Code PM not found (.claude directory missing)"
     fi
 
-    # Check for uncommitted changes
-    if ! git diff-index --quiet HEAD --; then
-        confirm "⚠️  You have uncommitted changes. Restoring will overwrite them."
+    # Warn about uncommitted git changes if in git repo
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        if ! git diff-index --quiet HEAD --; then
+            confirm "⚠️  You have uncommitted git changes. Restoring will not affect git, but you may want to commit first."
+        fi
     fi
 }
 
@@ -94,41 +97,37 @@ function validate_environment() {
 function find_backup() {
     local backup_name="$1"
     
-    # Check for git branch
-    BACKUP_BRANCH="ccpm-backup-$backup_name"
-    if git show-ref --verify --quiet "refs/heads/$BACKUP_BRANCH"; then
-        BACKUP_BRANCH_EXISTS=true
-        info "Found backup branch: $BACKUP_BRANCH"
-    else
-        BACKUP_BRANCH_EXISTS=false
-        warning "Backup branch not found: $BACKUP_BRANCH"
-    fi
-    
     # Check for file backup
     BACKUP_PATH="$BACKUP_DIR/$backup_name"
     if [[ -d "$BACKUP_PATH" ]]; then
         BACKUP_FILES_EXIST=true
         info "Found backup files: $BACKUP_PATH"
+        
+        # Check for backup info
+        if [[ -f "$BACKUP_PATH/backup-info.json" ]]; then
+            local backup_date=$(grep '"created"' "$BACKUP_PATH/backup-info.json" 2>/dev/null | cut -d'"' -f4 || echo "unknown")
+            local claude_version=$(grep '"claude_version"' "$BACKUP_PATH/backup-info.json" 2>/dev/null | cut -d'"' -f4 || echo "unknown")
+            info "Backup created: $backup_date"
+            info "Claude version: $claude_version"
+        fi
     else
         BACKUP_FILES_EXIST=false
         warning "Backup files not found: $BACKUP_PATH"
     fi
     
-    # Must have at least one type of backup
-    if [[ "$BACKUP_BRANCH_EXISTS" == false && "$BACKUP_FILES_EXIST" == false ]]; then
-        error_exit "No backup found with name: $backup_name"
+    # Check for git tag
+    GIT_TAG_EXISTS=false
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        local tag_name="ccpm-backup-$backup_name"
+        if git tag -l "$tag_name" | grep -q "^$tag_name$"; then
+            GIT_TAG_EXISTS=true
+            info "Found git tag: $tag_name"
+        fi
     fi
-}
-
-# Restore from git branch
-function restore_from_branch() {
-    if [[ "$BACKUP_BRANCH_EXISTS" == true ]]; then
-        info "Restoring git state from branch: $BACKUP_BRANCH"
-        
-        # Reset to backup branch state
-        git reset --hard "$BACKUP_BRANCH" || error_exit "Failed to reset to backup branch"
-        
-        success "Git state restored from backup branch"
+    
+    # Must have file backup (git tag is optional)
+    if [[ "$BACKUP_FILES_EXIST" == false ]]; then
+        error_exit "No backup found with name: $backup_name"
     fi
 }
 
@@ -142,6 +141,10 @@ function restore_preserved_files() {
         if [[ -f "$manifest" ]]; then
             info "Using backup manifest for restore"
             
+            # Count files to restore
+            local file_count=$(grep -v "^#" "$manifest" | grep -v "^$" | wc -l | tr -d ' ')
+            info "Restoring $file_count items from backup"
+            
             # Restore files listed in manifest
             while IFS= read -r line; do
                 # Skip comments and empty lines
@@ -151,6 +154,17 @@ function restore_preserved_files() {
                 local file="$line"
                 local backup_file="$BACKUP_PATH/$file"
                 
+                # Handle special cases
+                if [[ "$file" == ".claude/ (complete)" ]]; then
+                    # Restore complete .claude directory
+                    if [[ -d "$BACKUP_PATH/.claude-complete" ]]; then
+                        info "Restoring complete .claude directory"
+                        rm -rf .claude/* 2>/dev/null || true
+                        cp -r "$BACKUP_PATH/.claude-complete"/* .claude/ 2>/dev/null || true
+                    fi
+                    continue
+                fi
+                
                 if [[ -f "$backup_file" ]]; then
                     info "Restoring file: $file"
                     mkdir -p "$(dirname "$file")"
@@ -158,6 +172,7 @@ function restore_preserved_files() {
                 elif [[ -d "$backup_file" ]]; then
                     info "Restoring directory: $file"
                     mkdir -p "$(dirname "$file")"
+                    rm -rf "$file" 2>/dev/null || true
                     cp -r "$backup_file" "$(dirname "$file")/"
                 fi
             done < "$manifest"
@@ -166,16 +181,43 @@ function restore_preserved_files() {
             warning "No manifest found, restoring all backup files"
             
             cd "$BACKUP_PATH"
-            find . -type f -not -name "backup-manifest.txt" | while read -r file; do
+            find . -type f -not -name "backup-manifest.txt" -not -name "backup-info.json" | while read -r file; do
                 local target="$PROJECT_ROOT/${file#./}"
+                
+                # Skip special backup directories
+                [[ "$file" == *".claude-complete"* ]] && continue
+                
                 info "Restoring: $file"
                 mkdir -p "$(dirname "$target")"
                 cp "$file" "$target"
             done
             cd "$PROJECT_ROOT"
+            
+            # Restore complete .claude directory if available
+            if [[ -d "$BACKUP_PATH/.claude-complete" ]]; then
+                info "Restoring complete .claude directory from backup"
+                rm -rf .claude/* 2>/dev/null || true
+                cp -r "$BACKUP_PATH/.claude-complete"/* .claude/ 2>/dev/null || true
+            fi
         fi
         
         success "Preserved files restored from backup"
+    fi
+}
+
+# Restore from git tag if available
+function restore_from_git_tag() {
+    if [[ "$GIT_TAG_EXISTS" == true ]] && git rev-parse --git-dir >/dev/null 2>&1; then
+        local tag_name="ccpm-backup-$backup_name"
+        
+        confirm "Also restore git state to tag $tag_name?"
+        
+        info "Restoring git state from tag: $tag_name"
+        
+        # Reset to tag state (this will affect the entire repository)
+        git reset --hard "$tag_name" || error_exit "Failed to reset to backup tag"
+        
+        success "Git state restored from backup tag"
     fi
 }
 
@@ -188,14 +230,15 @@ function validate_restore() {
     for file in "${critical_files[@]}"; do
         if [[ ! -e "$file" ]]; then
             warning "Critical file/directory missing after restore: $file"
+        else
+            success "Found: $file"
         fi
     done
     
-    # Check git status
-    if git diff-index --quiet HEAD --; then
-        success "Git working directory is clean"
-    else
-        info "Git working directory has changes (this may be expected)"
+    # Show restored version
+    if [[ -f ".claude/VERSION" ]]; then
+        local restored_version=$(cat ".claude/VERSION")
+        info "Restored Claude Code PM version: $restored_version"
     fi
     
     success "Restore validation completed"
@@ -213,24 +256,22 @@ function main() {
     info "Starting Claude Code PM restore process"
     info "Backup name: $backup_name"
     
-    cd "$PROJECT_ROOT" || error_exit "Could not change to project root"
-    
     validate_environment
     find_backup "$backup_name"
     
     # Show what will be restored
     info "Restore plan:"
-    if [[ "$BACKUP_BRANCH_EXISTS" == true ]]; then
-        info "  - Git state from branch: $BACKUP_BRANCH"
-    fi
     if [[ "$BACKUP_FILES_EXIST" == true ]]; then
         info "  - Preserved files from: $BACKUP_PATH"
     fi
+    if [[ "$GIT_TAG_EXISTS" == true ]]; then
+        info "  - Git tag available: ccpm-backup-$backup_name"
+    fi
     
-    confirm "⚠️  This will overwrite current files with backup data."
+    confirm "⚠️  This will overwrite current .claude files with backup data."
     
-    restore_from_branch
     restore_preserved_files
+    restore_from_git_tag
     validate_restore
     
     success "Restore completed successfully!"
@@ -240,6 +281,15 @@ function main() {
     info "  1. Review restored files"
     info "  2. Run validation: /pm:validate"
     info "  3. Test your project functionality"
+    
+    # Show what changed
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        if ! git diff-index --quiet HEAD --; then
+            info ""
+            info "Git status after restore:"
+            git status --short || true
+        fi
+    fi
 }
 
 # Run main function if script is executed directly
