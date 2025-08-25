@@ -244,6 +244,13 @@ Specialized agents implement tasks while maintaining progress updates and an aud
 - `/pm:clean` - Archive completed work
 - `/pm:search` - Search across all content
 
+### Update Commands
+- `/pm:update-init` - Initialize update system for project
+- `/pm:update-check` - Check for available system updates  
+- `/pm:update` - Apply system updates while preserving project data
+- `/pm:update-status` - Show system version and configuration
+- `/pm:update-rollback` - Rollback to previous backup
+
 ## The Parallel Execution System
 
 ### Issues Aren't Atomic

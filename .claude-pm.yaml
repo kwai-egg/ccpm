@@ -1,0 +1,82 @@
+---
+# Claude Code PM Update Configuration
+# This file controls what gets updated vs preserved during system updates
+
+version: 1.0
+upstream: https://github.com/kwai-egg/ccpm.git
+branch: main
+
+# Files and directories to preserve during updates (project-specific data)
+preserve:
+  - ".claude/epics/"           # PM workspace with project epics
+  - ".claude/prds/"            # Product Requirements Documents
+  - ".claude/context/"         # Project context documentation
+  - ".claude/CLAUDE.md"        # Project-specific Claude instructions
+  - ".claude/**/*.local.*"     # Any .local files (settings, configs)
+  - ".claude/settings.json"    # Local settings
+  - ".claude/config.yaml"      # Local configuration
+  - ".gitignore"              # Project gitignore (may have custom entries)
+  - "README.md"               # Project README (may be customized)
+
+# Files and directories to update from upstream (system components)
+update:
+  - ".claude/agents/"          # AI agent definitions
+  - ".claude/commands/"        # Command specifications and implementations
+  - ".claude/rules/"           # System operation rules and patterns
+  - ".claude/scripts/"         # Automation and utility scripts
+  - ".claude/templates/"       # Content templates and patterns
+  - ".claude/VERSION"          # Version tracking
+  - ".claude/CHANGELOG.md"     # System changelog
+  - "AGENTS.md"               # Agent documentation
+  - "COMMANDS.md"             # Command reference
+  - "LICENSE"                 # License file
+  - "screenshot.webp"         # Project screenshot
+
+# Merge strategies for different file types
+merge_strategy:
+  # Always use upstream version (overwrite local changes)
+  theirs:
+    - ".claude/agents/**"
+    - ".claude/commands/**"
+    - ".claude/rules/**"
+    - ".claude/scripts/**"
+    - ".claude/VERSION"
+    - ".claude/CHANGELOG.md"
+    - "AGENTS.md"
+    - "COMMANDS.md"
+    - "LICENSE"
+
+  # Always keep local version (never overwrite)
+  ours:
+    - ".claude/epics/**"
+    - ".claude/prds/**"
+    - ".claude/context/**"
+    - ".claude/CLAUDE.md"
+    - ".claude/**/*.local.*"
+
+  # Attempt to merge, prompt on conflicts
+  merge:
+    - ".gitignore"
+    - "README.md"
+    - ".claude/templates/**"
+
+# Backup configuration
+backup:
+  enabled: true
+  branch_prefix: "ccpm-backup-"
+  keep_backups: 5              # Number of backup branches to retain
+  backup_location: ".ccpm-backups/"
+
+# Update behavior
+update_behavior:
+  check_uncommitted: true      # Fail if uncommitted changes exist
+  create_backup: true          # Always create backup before update
+  validate_after: true         # Run validation after update
+  auto_cleanup: false          # Don't auto-delete backup branches
+
+# Validation settings
+validation:
+  check_commands: true         # Verify command files are valid
+  check_structure: true        # Verify directory structure
+  check_dependencies: true     # Verify required tools are available
+  check_git_status: true       # Verify git status is clean after update
