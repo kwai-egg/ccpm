@@ -46,6 +46,38 @@ Task:
     Do NOT return code snippets or detailed explanations.
 ```
 
+### 3.5 Recovery Sub-Agent Prompt (NEW)
+For streams that need retry with guidance:
+
+```yaml
+Task:
+  description: "Stream {X} Recovery: {brief description}"
+  subagent_type: "general-purpose"
+  prompt: |
+    You are recovering a blocked work stream in worktree: {worktree_path}
+
+    PREVIOUS ATTEMPT FAILED:
+    {failure_reason}
+
+    USER GUIDANCE:
+    {guidance_content}
+
+    Stream: {stream_name}
+    Original Requirements: {requirements}
+
+    Instructions:
+    1. Follow the user's guidance to work around the blockage
+    2. Implement alternative approaches as suggested
+    3. If you cannot proceed, clearly explain why
+    4. Complete as much as possible given constraints
+
+    Return:
+    - What you completed with the guidance
+    - Any remaining blockers
+    - Files modified
+    - Test results if applicable
+```
+
 ### 3. Coordinate Execution
 - Monitor sub-agent responses
 - Track which streams complete successfully
@@ -81,6 +113,18 @@ After all sub-agents complete or report:
 ### Overall Status
 {Complete/Partially Complete/Blocked}
 
+### Recovery Status
+{If any streams required guidance}
+- Recovered: {list of successfully recovered streams}
+- Failed Recovery: {list of streams that failed even with guidance}
+- Awaiting Guidance: {list of streams still waiting for user input}
+
+### User Action Required
+{If any streams need guidance}
+Please provide guidance by editing:
+- `.claude/epics/{epic}/coordination/stream-X-guidance.md`
+Then run: `/pm:epic-retry {epic}` to continue
+
 ### Next Steps
 {What should happen next}
 ```
@@ -103,6 +147,18 @@ After all sub-agents complete or report:
    - Check git status in worktree
    - Prepare consolidated summary
    - Return to main thread
+
+4. **Recovery Phase** (NEW)
+   - Check coordination directory for blocked streams
+   - Look for user-provided guidance files
+   - Relaunch streams with enhanced context
+   - Track recovery attempts (max 2 per stream)
+
+5. **Guidance Request Phase** (NEW)
+   - For unrecoverable blocks without guidance
+   - Create clear guidance request files
+   - Provide user with specific instructions
+   - Pause execution pending user input
 
 ## Context Management
 
@@ -132,12 +188,23 @@ When sub-agents report blockers:
 2. If not, note it in final summary for human intervention
 3. Continue with other streams
 
-## Error Handling
+## Enhanced Error Handling
 
-If a sub-agent fails:
-- Note the failure
-- Continue with other streams
-- Report failure in summary with enough context for debugging
+When a sub-agent fails:
+1. Check if error contains permission/access denied patterns
+2. Extract specific details about what was blocked
+3. Create coordination status file:
+   ```bash
+   bash .claude/scripts/pm/coordination-block.sh \
+     {epic} {stream} "permission_denied" \
+     "{attempted_action}" "{error_details}"
+   ```
+4. Check if this stream blocks others
+5. Continue with non-dependent streams
+6. After all possible streams complete:
+   - Check for guidance files
+   - Prepare recovery attempts
+   - Report streams awaiting guidance
 
 If worktree has conflicts:
 - Stop execution
