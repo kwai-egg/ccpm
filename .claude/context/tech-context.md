@@ -1,7 +1,7 @@
 ---
 created: 2025-08-25T22:25:24Z
-last_updated: 2025-08-25T22:25:24Z
-version: 1.0
+last_updated: 2025-08-25T23:57:41Z
+version: 1.1
 author: Claude Code PM System
 ---
 
@@ -46,6 +46,7 @@ author: Claude Code PM System
 - **Standard Unix Tools**: find, grep, sed, awk, cat, ls, etc.
 - **Date Command**: UTC timestamp generation
 - **File System**: Read/write access to project directory
+- **Update System**: Built-in versioning and backup/restore capabilities
 
 ## Architecture Patterns
 

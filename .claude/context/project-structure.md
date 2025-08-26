@@ -1,7 +1,7 @@
 ---
 created: 2025-08-25T22:25:24Z
-last_updated: 2025-08-25T22:25:24Z
-version: 1.0
+last_updated: 2025-08-25T23:57:41Z
+version: 1.1
 author: Claude Code PM System
 ---
 
@@ -12,14 +12,18 @@ author: Claude Code PM System
 ```
 ccpm/
 ├── .claude/                # Core system directory
+├── .claude-pm.yaml        # Project management configuration
 ├── .git/                   # Git repository data
 ├── .gitignore             # Git ignore patterns
-├── AGENTS.md              # Agent system documentation
-├── COMMANDS.md            # Command reference guide
-├── LICENSE                # MIT license file
-├── README.md              # Main project documentation
-└── screenshot.webp        # Project screenshot
+├── .vscode/               # VS Code workspace settings
+│   └── settings.json     # Editor configuration
+└── [project files]       # Main project content
 ```
+
+**Recent Changes:**
+- Removed legacy documentation files (AGENTS.md, COMMANDS.md, LICENSE, README.md, screenshot.webp)
+- Added .claude-pm.yaml for project management configuration
+- Added .vscode/ directory for consistent development environment
 
 ## Core System Architecture (.claude/)
 
@@ -34,7 +38,10 @@ ccpm/
 ├── prds/                  # Product Requirements Documents
 ├── rules/                 # System operation rules
 ├── scripts/               # Automation and utility scripts
-└── templates/             # Reusable templates
+├── templates/             # Reusable templates
+├── CHANGELOG.md           # System change history
+├── VERSION                # Current system version
+└── settings.local.json    # Local configuration overrides
 ```
 
 ### Agent System (agents/)
@@ -62,7 +69,13 @@ commands/
 │   ├── epic-*.md         # Epic management commands
 │   ├── issue-*.md        # Issue workflow commands
 │   ├── prd-*.md          # PRD lifecycle commands
-│   └── [workflow].md     # Additional workflow commands
+│   ├── update*.md        # Update system commands
+│   │   ├── update.md     # Main update command
+│   │   ├── update-check.md # Update availability check
+│   │   ├── update-init.md  # Initialize update system
+│   │   ├── update-rollback.md # Rollback updates
+│   │   └── update-status.md   # Update system status
+│   └── epic-retry.md     # Epic retry functionality
 └── testing/
     └── prime.md          # Test environment setup
 ```
@@ -114,12 +127,33 @@ rules/
 scripts/
 ├── pm/                   # Project management automation
 │   ├── coordination-*.sh # Multi-agent coordination utilities
+│   │   ├── coordination-block.sh   # Coordination blocking
+│   │   ├── coordination-check.sh   # Check coordination state  
+│   │   └── coordination-init.sh    # Initialize coordination
+│   ├── update-*.sh       # Update system scripts
+│   │   ├── update-backup.sh        # Create system backups
+│   │   ├── update-check.sh         # Check for updates
+│   │   ├── update-init.sh          # Initialize update system
+│   │   ├── update-restore.sh       # Restore from backup
+│   │   └── update.sh               # Main update script
+│   ├── github-utils.sh   # GitHub integration utilities
+│   ├── help.sh          # Help system
 │   └── create-guidance-template.sh # Template generation
 └── [additional scripts] # Other automation utilities
 ```
 
 **Purpose**: Automation utilities supporting command implementations
 **Pattern**: Shell scripts handling complex system operations
+
+### Templates System (templates/)
+
+```
+templates/
+└── stream-guidance-template.md # Template for development guidance
+```
+
+**Purpose**: Reusable templates for consistent workflow and documentation
+**Pattern**: Markdown templates with placeholder content for quick initialization
 
 ## File Naming Conventions
 

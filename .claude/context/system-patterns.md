@@ -1,7 +1,7 @@
 ---
 created: 2025-08-25T22:25:24Z
-last_updated: 2025-08-25T22:25:24Z
-version: 1.0
+last_updated: 2025-08-25T23:57:41Z
+version: 1.1
 author: Claude Code PM System
 ---
 
@@ -77,6 +77,29 @@ project/
 - **Clean Merges**: Controlled integration when ready
 - **Context Switching**: Easy switching between different epics
 - **Resource Efficiency**: Shared git history, separate working directories
+
+### Update System Pattern
+Comprehensive update management with versioning and backup/restore:
+
+```
+.ccpm-backups/
+├── backup-2025-08-25-23-45/  # Timestamped backup snapshots
+├── backup-2025-08-25-22-30/
+└── current -> backup-2025-08-25-23-45/
+```
+
+**Key Components:**
+- **Version Tracking**: Semantic versioning in `.claude/VERSION`
+- **Change Logging**: Comprehensive changelog in `.claude/CHANGELOG.md`
+- **Backup Management**: Automatic backups before updates
+- **Rollback Capability**: Restore previous system states
+- **Update Validation**: Verify system integrity after updates
+
+**Benefits:**
+- **Safe Updates**: Rollback capability prevents system breakage
+- **Change Tracking**: Complete audit trail of system modifications
+- **Configuration Management**: Layered settings with project overrides
+- **Automated Maintenance**: Self-managing backup retention
 
 ## Data Flow Patterns
 
