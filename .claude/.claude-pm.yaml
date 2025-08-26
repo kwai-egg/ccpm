@@ -13,8 +13,6 @@ preserve:
   - ".claude/**/*.local.*"     # Any .local files (settings, configs)
   - ".claude/settings.json"    # Local settings
   - ".claude/config.yaml"      # Local configuration
-  - ".gitignore"              # Project gitignore (may have custom entries)
-  - "README.md"               # Project README (may be customized)
 
 # Files and directories to update from upstream (system components)
 update:
