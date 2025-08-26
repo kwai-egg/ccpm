@@ -1,7 +1,7 @@
 ---
 created: 2025-08-25T22:25:24Z
-last_updated: 2025-08-25T23:57:41Z
-version: 1.1
+last_updated: 2025-08-26T18:58:39Z
+version: 1.2
 author: Claude Code PM System
 ---
 
@@ -15,6 +15,8 @@ author: Claude Code PM System
 - **Git**: Version control and worktree management
 - **GitHub CLI (gh)**: Repository integration and API access
 - **YAML**: Configuration and frontmatter
+- **Node.js V8**: Memory management and heap optimization
+- **JSON**: Configuration state and pattern storage
 
 ### Development Environment
 - **Platform Support**: macOS, Linux (bash-compatible environments)
@@ -47,6 +49,8 @@ author: Claude Code PM System
 - **Date Command**: UTC timestamp generation
 - **File System**: Read/write access to project directory
 - **Update System**: Built-in versioning and backup/restore capabilities
+- **Memory Monitoring**: System memory assessment and resource tracking
+- **Process Management**: Agent lifecycle and cleanup utilities
 
 ## Architecture Patterns
 
@@ -73,6 +77,13 @@ author: Claude Code PM System
 - Branch-per-epic or branch-per-feature
 - Clean merge strategy for completed work
 - Conflict prevention through isolation
+
+### Memory Management Pattern
+- Dynamic batching based on available system memory
+- Memory-aware agent spawning with configurable limits
+- Real-time resource monitoring and cleanup verification
+- Learning system for optimization based on usage patterns
+- Node.js heap optimization with V8 flags
 
 ## File Formats
 
@@ -123,16 +134,19 @@ author: Claude Code PM System
 - **Context Compression**: Summarized information in specialized formats
 
 ### Execution Efficiency
-- **Parallel Processing**: Multiple agents working simultaneously
+- **Memory-Aware Parallel Processing**: 8-12 agents with dynamic batching
+- **Resource-Based Scheduling**: Spawn capacity calculated from available memory
 - **Local-first Operations**: Work locally, sync when ready
 - **Batch Operations**: Group related operations for efficiency
+- **Memory Optimization**: V8 heap tuning and garbage collection optimization
 - **Caching**: Avoid redundant operations and API calls
 
 ### Scalability
+- **Memory-Constrained Scaling**: Maximum 80GB of 96GB system memory usage
 - **Modular Architecture**: Add new agents and commands independently
 - **Directory Organization**: Logical separation prevents conflicts
 - **Template System**: Reusable patterns for consistent implementation
-- **Configuration Management**: Environment-specific settings
+- **Configuration Management**: Environment-specific settings with memory tuning
 
 ## Security Considerations
 
@@ -191,3 +205,6 @@ author: Claude Code PM System
 - Maintain consistency with existing patterns
 
 This technical foundation enables sophisticated project management while maintaining simplicity and reliability.
+
+## Update History
+- 2025-08-26T18:58:39Z: Added memory management architecture pattern, Node.js V8 optimization, memory-aware execution efficiency, resource monitoring dependencies

@@ -1,7 +1,7 @@
 ---
 created: 2025-08-25T22:25:24Z
-last_updated: 2025-08-25T23:57:41Z
-version: 1.1
+last_updated: 2025-08-26T18:58:39Z
+version: 1.2
 author: Claude Code PM System
 ---
 
@@ -20,9 +20,10 @@ ccpm/
 ```
 
 **Recent Changes:**
-- Removed legacy documentation files (AGENTS.md, COMMANDS.md, LICENSE, README.md, screenshot.webp)
-- Moved .claude-pm.yaml from root to .claude/ directory for better organization
-- Added .vscode/ directory for consistent development environment
+- **Memory Optimization System**: Added comprehensive memory management infrastructure
+- **New Directories**: agent-pool/, env/, memory-feedback/ for resource management
+- **Enhanced Scripts**: 8 new memory management scripts in scripts/pm/
+- **Configuration Enhancement**: Memory management settings in .claude-pm.yaml
 
 ## Core System Architecture (.claude/)
 
@@ -30,16 +31,20 @@ ccpm/
 
 ```
 .claude/
+├── agent-pool/            # Agent process pooling system
 ├── agents/                # Specialized task agents
 ├── commands/              # Command definitions and implementations
 ├── context/               # Project context documentation
+├── env/                   # Environment configuration files
 ├── epics/                 # PM workspace for epic management
+├── memory-feedback/       # Memory optimization feedback system
 ├── prds/                  # Product Requirements Documents
 ├── rules/                 # System operation rules
 ├── scripts/               # Automation and utility scripts
 ├── templates/             # Reusable templates
-├── .claude-pm.yaml        # Project management configuration
+├── .claude-pm.yaml        # Project management configuration (Enhanced)
 ├── CHANGELOG.md           # System change history
+├── MEMORY-OPTIMIZATION-SUMMARY.md # Memory system documentation
 ├── VERSION                # Current system version
 └── settings.local.json    # Local configuration overrides
 ```
@@ -125,11 +130,20 @@ rules/
 
 ```
 scripts/
-├── pm/                   # Project management automation
+├── pm/                   # Project management automation (25+ scripts)
 │   ├── coordination-*.sh # Multi-agent coordination utilities
-│   │   ├── coordination-block.sh   # Coordination blocking
-│   │   ├── coordination-check.sh   # Check coordination state  
-│   │   └── coordination-init.sh    # Initialize coordination
+│   │   ├── coordination-block.sh    # Coordination blocking
+│   │   ├── coordination-check.sh    # Check coordination state  
+│   │   ├── coordination-init.sh     # Initialize coordination
+│   │   └── coordination-memory.sh   # Memory-aware coordination
+│   ├── memory-*.sh       # Memory optimization system
+│   │   ├── memory-monitor.sh        # System memory monitoring
+│   │   ├── memory-env.sh           # Environment configuration  
+│   │   ├── memory-retry.sh         # Memory-based retry logic
+│   │   └── memory-feedback.sh      # Learning and optimization
+│   ├── agent-pool.sh     # Agent process pooling
+│   ├── coordinator-setup.sh # Coordinator configuration
+│   ├── start-coordinator.sh # Memory-optimized startup
 │   ├── update-*.sh       # Update system scripts
 │   │   ├── update-backup.sh        # Create system backups
 │   │   ├── update-check.sh         # Check for updates
@@ -139,7 +153,7 @@ scripts/
 │   ├── github-utils.sh   # GitHub integration utilities
 │   ├── help.sh          # Help system
 │   └── create-guidance-template.sh # Template generation
-└── [additional scripts] # Other automation utilities
+└── test-and-log.sh      # Test execution utilities
 ```
 
 **Purpose**: Automation utilities supporting command implementations
@@ -154,6 +168,22 @@ templates/
 
 **Purpose**: Reusable templates for consistent workflow and documentation
 **Pattern**: Markdown templates with placeholder content for quick initialization
+
+### Memory Optimization System
+
+```
+.claude/
+├── agent-pool/            # Agent process pooling
+│   └── pool-state.json   # Pool state and metrics
+├── env/                  # Environment configuration
+│   ├── coordinator.env   # Coordinator NODE_OPTIONS (16GB heap)
+│   └── agent.env        # Agent NODE_OPTIONS (8GB heap)
+└── memory-feedback/      # Learning and optimization system
+    └── patterns.json    # Historical execution patterns
+```
+
+**Purpose**: Comprehensive memory management for parallel agent execution
+**Pattern**: Resource monitoring, dynamic batching, and optimization feedback
 
 ## File Naming Conventions
 
@@ -205,3 +235,6 @@ templates/
 - Scripts support automation needs
 
 This structure enables scalable project management while maintaining clean separation of concerns and comprehensive documentation.
+
+## Update History
+- 2025-08-26T18:58:39Z: Added memory optimization system directories (agent-pool/, env/, memory-feedback/), 8 new memory management scripts, enhanced script organization

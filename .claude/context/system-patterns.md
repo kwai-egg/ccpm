@@ -1,7 +1,7 @@
 ---
 created: 2025-08-25T22:25:24Z
-last_updated: 2025-08-25T23:57:41Z
-version: 1.1
+last_updated: 2025-08-26T18:58:39Z
+version: 1.2
 author: Claude Code PM System
 ---
 
@@ -36,13 +36,14 @@ Different agents handle specific domains to optimize context usage:
 - **code-analyzer**: Deep code analysis, bug detection, logic tracing
 - **file-analyzer**: File content summarization and extraction
 - **test-runner**: Test execution and result analysis
-- **parallel-worker**: Multi-stream coordination and execution
+- **parallel-worker**: Multi-stream coordination and execution (Enhanced with memory management)
 
 **Benefits:**
 - Prevents context pollution in main conversation
 - Enables domain expertise optimization
-- Allows parallel execution of different task types
+- Allows parallel execution of different task types with memory constraints
 - Maintains clean separation of concerns
+- Memory-aware spawning prevents system resource exhaustion
 
 ### Context Preservation Pattern
 Persistent knowledge management through file-based context:
@@ -100,6 +101,26 @@ Comprehensive update management with versioning and backup/restore:
 - **Change Tracking**: Complete audit trail of system modifications
 - **Configuration Management**: Layered settings with project overrides
 - **Automated Maintenance**: Self-managing backup retention
+
+### Memory-Aware Execution Pattern
+Intelligent resource management for parallel agent execution:
+
+```
+Memory Assessment → Dynamic Batching → Controlled Spawning → Resource Monitoring → Cleanup Verification → Pattern Learning
+```
+
+**Key Components:**
+- **Capacity Assessment**: Real-time evaluation of available system memory
+- **Dynamic Batching**: Automatic sizing from 1-8 agents based on capacity
+- **Resource Monitoring**: Continuous memory tracking during execution
+- **Cleanup Verification**: Ensures resource cleanup after agent completion
+- **Learning System**: Historical pattern analysis for optimization
+
+**Benefits:**
+- **Prevents OOM Errors**: System respects memory constraints
+- **Optimal Performance**: Maximum throughput within resource limits
+- **Predictable Behavior**: Consistent performance across workload sizes
+- **Self-Optimizing**: Learns from execution patterns to improve over time
 
 ## Data Flow Patterns
 
@@ -298,3 +319,6 @@ Flexible configuration through layered settings:
 - **Environment Settings**: Runtime configuration
 
 This pattern system enables sophisticated project management while maintaining simplicity, reliability, and extensibility.
+
+## Update History
+- 2025-08-26T18:58:39Z: Added memory-aware execution pattern, enhanced agent specialization with memory management, updated execution efficiency patterns

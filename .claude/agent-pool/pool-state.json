@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "created": "2025-08-26T18:53:02Z",
+  "pool_size": 0,
+  "available_slots": 0,
+  "active_agents": [],
+  "agent_history": [],
+  "memory_efficiency": {
+    "reuse_count": 0,
+    "memory_saved_gb": 0,
+    "avg_agent_lifetime": 0
+  }
+}

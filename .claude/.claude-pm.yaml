@@ -43,3 +43,21 @@ validation:
   check_structure: true        # Verify directory structure
   check_dependencies: true     # Verify required tools are available
   check_files: true            # Verify critical files exist after update
+
+# Memory Management Settings
+memory_management:
+  enabled: true
+  max_concurrent_agents: 8     # Default maximum concurrent agents
+  memory_per_agent_gb: 8       # Memory allocation per agent in GB
+  total_memory_limit_gb: 96    # Total system memory available
+  coordinator_memory_gb: 16    # Memory for coordinator process
+  monitoring_enabled: true     # Enable memory monitoring
+  cleanup_timeout: 30          # Timeout for agent cleanup in seconds
+  retry_on_memory_limit: true  # Retry failed streams due to memory
+  
+# Node.js Environment Settings
+node_options:
+  coordinator_heap_size: 16384      # --max-old-space-size for coordinator
+  agent_heap_size: 8192            # --max-old-space-size for agents
+  gc_exposure: true                # --expose-gc for manual garbage collection
+  optimize_for_size: true          # --optimize_for_size for memory efficiency

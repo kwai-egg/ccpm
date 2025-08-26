@@ -15,9 +15,26 @@ You are a parallel execution coordinator working in a git worktree. Your job is 
 - Read the issue analysis to understand parallel streams
 - Identify which streams can start immediately
 - Note dependencies between streams
+- Assess memory capacity for parallel execution
+- Calculate optimal batch sizing for available resources
 
-### 2. Spawn Sub-Agents
-For each work stream that can start, spawn a sub-agent using the Task tool:
+### 2. Memory-Aware Agent Spawning
+Before spawning agents, assess system capacity and plan execution:
+
+**Step 1: Memory Assessment**
+```bash
+# Check memory capacity for spawning
+bash .claude/scripts/pm/coordination-memory.sh {epic_name} assess {total_streams}
+```
+
+**Step 2: Dynamic Batching**
+```bash
+# Calculate optimal batch size
+bash .claude/scripts/pm/coordination-memory.sh {epic_name} batch {total_streams}
+```
+
+**Step 3: Spawn Sub-Agents**
+For each work stream in the current batch, spawn a sub-agent using the Task tool with memory-optimized environment:
 
 ```yaml
 Task:
@@ -25,25 +42,38 @@ Task:
   subagent_type: "general-purpose"
   prompt: |
     You are implementing a specific work stream in worktree: {worktree_path}
+    
+    MEMORY MANAGEMENT: This agent is part of a memory-optimized parallel execution.
+    - Agent memory limit: {agent_memory_limit}GB
+    - Batch: {current_batch}/{total_batches}
+    - Stream ID: {stream_id}
 
     Stream: {stream_name}
     Files to modify: {file_patterns}
     Work to complete: {detailed_requirements}
 
     Instructions:
-    1. Implement ONLY your assigned scope
-    2. Work ONLY on your assigned files
-    3. Commit frequently with format: "Issue #{number}: {specific change}"
-    4. If you need files outside your scope, note it and continue with what you can
-    5. Test your changes if applicable
+    1. Set NODE_OPTIONS="--max-old-space-size={agent_heap_size}" for memory management
+    2. Implement ONLY your assigned scope
+    3. Work ONLY on your assigned files
+    4. Commit frequently with format: "Issue #{number}: {specific change}"
+    5. If you encounter memory issues, report immediately and exit gracefully
+    6. Monitor memory usage and clean up resources when possible
+    7. If you need files outside your scope, note it and continue with what you can
+    8. Test your changes if applicable
+    9. Report completion status for memory tracking
 
     Return ONLY:
     - What you completed (bullet list)
     - Files modified (list)
+    - Memory usage status (normal/high/critical)
     - Any blockers or issues
     - Tests results if applicable
 
     Do NOT return code snippets or detailed explanations.
+
+    After completion, this agent will be tracked via:
+    bash .claude/scripts/pm/coordination-memory.sh {epic_name} complete {stream_id} {status}
 ```
 
 ### 3.5 Recovery Sub-Agent Prompt (NEW)
@@ -91,16 +121,25 @@ After all sub-agents complete or report:
 ```markdown
 ## Parallel Execution Summary
 
+### Memory Management
+- Total streams: {total_stream_count}
+- Execution strategy: {single_batch/multi_batch}
+- Batches executed: {batches_completed}/{total_batches}
+- Peak memory usage: {peak_memory_usage}%
+- Memory cleanup: {successful/failed}
+- Agent memory issues: {count}
+
 ### Completed Streams
-- Stream A: {what was done} ✓
-- Stream B: {what was done} ✓
-- Stream C: {what was done} ✓
+- Stream A: {what was done} ✓ [Memory: {normal/high/critical}]
+- Stream B: {what was done} ✓ [Memory: {normal/high/critical}]
+- Stream C: {what was done} ✓ [Memory: {normal/high/critical}]
 
 ### Files Modified
 - {consolidated list from all streams}
 
 ### Issues Encountered
 - {any blockers or problems}
+- {memory-related issues if any}
 
 ### Test Results
 - {combined test results if applicable}
@@ -135,17 +174,30 @@ Then run: `/pm:epic-retry {epic}` to continue
    - Verify worktree exists and is clean
    - Read issue requirements and analysis
    - Plan execution order based on dependencies
+   - Initialize memory management coordination
+   - Assess system memory capacity
 
-2. **Parallel Execution Phase**
-   - Spawn all independent streams simultaneously
-   - Wait for responses
-   - As streams complete, check if new streams can start
-   - Continue until all streams are processed
+2. **Memory Assessment Phase**
+   - Run memory capacity assessment for total stream count
+   - Calculate optimal batch sizes based on available memory
+   - Plan multi-batch execution if needed
+   - Set up memory monitoring for the epic
 
-3. **Consolidation Phase**
-   - Gather all sub-agent results
+3. **Batch Execution Phase** (Enhanced)
+   - For each batch:
+     - Verify memory capacity before spawning
+     - Spawn agents with memory-optimized configuration
+     - Track agent spawns in coordination system
+     - Wait for batch completion
+     - Perform memory cleanup between batches
+     - Monitor memory usage during execution
+   - Continue until all batches are processed
+
+4. **Consolidation Phase**
+   - Gather all sub-agent results across batches
    - Check git status in worktree
-   - Prepare consolidated summary
+   - Verify memory cleanup completion
+   - Prepare consolidated summary with memory metrics
    - Return to main thread
 
 4. **Recovery Phase** (NEW)
