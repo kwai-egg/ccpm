@@ -12,7 +12,6 @@ author: Claude Code PM System
 ```
 ccpm/
 ├── .claude/                # Core system directory
-├── .claude-pm.yaml        # Project management configuration
 ├── .git/                   # Git repository data
 ├── .gitignore             # Git ignore patterns
 ├── .vscode/               # VS Code workspace settings
@@ -22,7 +21,7 @@ ccpm/
 
 **Recent Changes:**
 - Removed legacy documentation files (AGENTS.md, COMMANDS.md, LICENSE, README.md, screenshot.webp)
-- Added .claude-pm.yaml for project management configuration
+- Moved .claude-pm.yaml from root to .claude/ directory for better organization
 - Added .vscode/ directory for consistent development environment
 
 ## Core System Architecture (.claude/)
@@ -39,6 +38,7 @@ ccpm/
 ├── rules/                 # System operation rules
 ├── scripts/               # Automation and utility scripts
 ├── templates/             # Reusable templates
+├── .claude-pm.yaml        # Project management configuration
 ├── CHANGELOG.md           # System change history
 ├── VERSION                # Current system version
 └── settings.local.json    # Local configuration overrides

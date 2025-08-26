@@ -186,7 +186,7 @@ function get_remote_changelog() {
 # Check if file should be updated based on patterns
 function should_update_file() {
     local file_path="$1"
-    local config_file="${2:-.claude-pm.yaml}"
+    local config_file="${2:-.claude/.claude-pm.yaml}"
     
     # If no config file, update everything in .claude/
     if [[ ! -f "$config_file" ]]; then
@@ -223,7 +223,7 @@ function should_update_file() {
 # Check if file should be preserved
 function should_preserve_file() {
     local file_path="$1"
-    local config_file="${2:-.claude-pm.yaml}"
+    local config_file="${2:-.claude/.claude-pm.yaml}"
     
     # If no config file, preserve specific directories
     if [[ ! -f "$config_file" ]]; then

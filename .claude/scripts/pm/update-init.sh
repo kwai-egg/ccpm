@@ -9,7 +9,7 @@ set -u  # Error on undefined variables
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(pwd)"
-CONFIG_FILE="$PROJECT_ROOT/.claude-pm.yaml"
+CONFIG_FILE="$PROJECT_ROOT/.claude/.claude-pm.yaml"
 VERSION_FILE="$PROJECT_ROOT/.claude/VERSION"
 
 # Default values
@@ -56,7 +56,7 @@ function validate_environment() {
     if git rev-parse --show-toplevel >/dev/null 2>&1; then
         PROJECT_ROOT="$(git rev-parse --show-toplevel)"
         cd "$PROJECT_ROOT"
-        CONFIG_FILE="$PROJECT_ROOT/.claude-pm.yaml"
+        CONFIG_FILE="$PROJECT_ROOT/.claude/.claude-pm.yaml"
         VERSION_FILE="$PROJECT_ROOT/.claude/VERSION"
     fi
 
@@ -250,10 +250,10 @@ function show_instructions() {
     info "4. For help with update commands:"
     info "   /pm:help | grep update"
     info ""
-    info "📝 Configuration saved to: .claude-pm.yaml"
+    info "📝 Configuration saved to: .claude/.claude-pm.yaml"
     info "💾 Backups will be stored in: .ccpm-backups/"
     info ""
-    info "🔧 To customize settings, edit .claude-pm.yaml"
+    info "🔧 To customize settings, edit .claude/.claude-pm.yaml"
     info "🔗 Upstream: $UPSTREAM (branch: $BRANCH)"
 }
 

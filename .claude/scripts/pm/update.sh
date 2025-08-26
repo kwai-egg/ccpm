@@ -9,7 +9,7 @@ set -u  # Error on undefined variables
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(pwd)"
-CONFIG_FILE="$PROJECT_ROOT/.claude-pm.yaml"
+CONFIG_FILE="$PROJECT_ROOT/.claude/.claude-pm.yaml"
 VERSION_FILE="$PROJECT_ROOT/.claude/VERSION"
 
 # Parse command line arguments
@@ -279,7 +279,7 @@ function update_root_files() {
 # Sync .gitignore with configuration
 function sync_gitignore() {
     if [[ "$DRY_RUN" == true ]]; then
-        dry_run_info "Would synchronize .gitignore with .claude-pm.yaml"
+        dry_run_info "Would synchronize .gitignore with .claude/.claude-pm.yaml"
         return
     fi
     
