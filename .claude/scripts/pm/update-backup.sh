@@ -8,9 +8,10 @@ set -u  # Error on undefined variables
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(pwd)"
-CONFIG_FILE="$PROJECT_ROOT/.claude/.claude-pm.yaml"
-BACKUP_DIR="$PROJECT_ROOT/.ccpm-backups"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CLAUDE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+CONFIG_FILE="$CLAUDE_DIR/.claude-pm.yaml"
+BACKUP_DIR="$CLAUDE_DIR/.ccpm-backups"
 
 # Default backup name with timestamp
 TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")

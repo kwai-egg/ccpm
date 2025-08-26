@@ -190,7 +190,7 @@ echo ""
 echo "🔍 Running initial system check..."
 
 # Check for available updates
-./.claude/scripts/pm/update-check.sh || true
+.claude/scripts/pm/update-check.sh || true
 
 echo ""
 echo "✅ Update system initialization complete!"

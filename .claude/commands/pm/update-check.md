@@ -31,11 +31,11 @@ test -n "$upstream_url" || error "No upstream URL configured"
 ```bash
 # Execute update check script
 if [[ "$VERBOSE" == true ]]; then
-    ./.claude/scripts/pm/update-check.sh --verbose
+    .claude/scripts/pm/update-check.sh --verbose
 elif [[ "$QUIET" == true ]]; then
-    ./.claude/scripts/pm/update-check.sh --quiet
+    .claude/scripts/pm/update-check.sh --quiet
 else
-    ./.claude/scripts/pm/update-check.sh
+    .claude/scripts/pm/update-check.sh
 fi
 
 # Capture exit code to determine if updates are available

@@ -8,8 +8,9 @@ set -u  # Error on undefined variables
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(pwd)"
-BACKUP_DIR="$PROJECT_ROOT/.ccpm-backups"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CLAUDE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+BACKUP_DIR="$CLAUDE_DIR/.ccpm-backups"
 
 # Colors for output
 RED='\033[0;31m'

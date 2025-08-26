@@ -8,9 +8,10 @@ set -u  # Error on undefined variables
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(pwd)"
-CONFIG_FILE="$PROJECT_ROOT/.claude/.claude-pm.yaml"
-VERSION_FILE="$PROJECT_ROOT/.claude/VERSION"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CLAUDE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+CONFIG_FILE="$CLAUDE_DIR/.claude-pm.yaml"
+VERSION_FILE="$CLAUDE_DIR/VERSION"
 
 # Default values
 DEFAULT_UPSTREAM="https://github.com/kwai-egg/ccpm.git"
@@ -52,13 +53,7 @@ source "$SCRIPT_DIR/github-utils.sh"
 
 # Validate environment
 function validate_environment() {
-    # Change to project root if we can determine it
-    if git rev-parse --show-toplevel >/dev/null 2>&1; then
-        PROJECT_ROOT="$(git rev-parse --show-toplevel)"
-        cd "$PROJECT_ROOT"
-        CONFIG_FILE="$PROJECT_ROOT/.claude/.claude-pm.yaml"
-        VERSION_FILE="$PROJECT_ROOT/.claude/VERSION"
-    fi
+    # Note: No longer requires git repository - works as standalone .claude system
 
     # Check if basic Claude Code PM structure exists
     if [[ ! -d ".claude" ]]; then
@@ -139,26 +134,12 @@ function setup_directories() {
     info "Setting up directory structure"
     
     # Create backup directory
-    mkdir -p ".ccpm-backups"
-    success "Backup directory created: .ccpm-backups/"
+    mkdir -p "$CLAUDE_DIR/.ccpm-backups"
+    success "Backup directory created in .claude/"
     
-    # Add to .gitignore if not already present
-    if [[ -f ".gitignore" ]]; then
-        if ! grep -q ".ccpm-backups" ".gitignore" 2>/dev/null; then
-            info "Adding backup directory to .gitignore"
-            echo "" >> ".gitignore"
-            echo "# Claude Code PM Update System" >> ".gitignore"
-            echo ".ccpm-backups/" >> ".gitignore"
-            echo ".claude/.last-update-check" >> ".gitignore"
-        fi
-    else
-        info "Creating .gitignore with backup directory"
-        cat > ".gitignore" << EOF
-# Claude Code PM Update System
-.ccmp-backups/
-.claude/.last-update-check
-EOF
-    fi
+    # Note: .gitignore management removed for standalone .claude operation
+    # When running as standalone, parent project should handle ignoring .claude/
+    info "Backup directory setup complete (no .gitignore modifications in standalone mode)"
 }
 
 # Setup version tracking

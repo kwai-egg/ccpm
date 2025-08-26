@@ -100,7 +100,7 @@ fi
 
 # Execute restore script
 echo "🚀 Executing rollback..."
-./.claude/scripts/pm/update-restore.sh "$backup_name"
+.claude/scripts/pm/update-restore.sh "$backup_name"
 ```
 
 ### Phase 4: Post-Rollback Validation
@@ -208,4 +208,4 @@ No specific configuration required. Uses existing:
 - `/pm:update` - Create updates (automatically creates backups)
 - `/pm:update-check` - Check if rollback is needed
 - `/pm:validate` - Verify system after rollback
-- `./.claude/scripts/pm/update-restore.sh` - Low-level restore script
+- `.claude/scripts/pm/update-restore.sh` - Low-level restore script

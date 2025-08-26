@@ -19,11 +19,11 @@ Updates the Claude Code PM system to the latest version while preserving all pro
 
 ### Phase 1: Pre-Update Validation
 ```bash
-# Check current directory and git status
-cd "$(git rev-parse --show-toplevel)" || error "Not in a git repository"
+# Check current directory (scripts will handle path resolution)
+# Note: No longer forcing cd to git root - scripts handle their own path resolution
 
 # Verify configuration exists
-test -f ".claude-pm.yaml" || error "Configuration file missing. Run '/pm:init' first"
+test -f ".claude/.claude-pm.yaml" || error "Configuration file missing. Run '/pm:init' first"
 
 # Check for uncommitted changes (unless --force used)
 if [[ "$FORCE" != true ]] && ! git diff-index --quiet HEAD --; then
@@ -37,7 +37,7 @@ command -v git >/dev/null || error "Git not installed"
 ### Phase 2: Update Check
 ```bash
 # Run update check to see what's available
-./.claude/scripts/pm/update-check.sh
+.claude/scripts/pm/update-check.sh
 
 # Ask user to confirm unless --dry-run
 if [[ "$DRY_RUN" != true ]]; then
@@ -52,7 +52,7 @@ fi
 # Create backup unless --no-backup specified
 if [[ "$NO_BACKUP" != true && "$DRY_RUN" != true ]]; then
     echo "🔄 Creating backup before update..."
-    ./.claude/scripts/pm/update-backup.sh "update-$(date -u +%Y%m%d-%H%M%S)"
+    .claude/scripts/pm/update-backup.sh "update-$(date -u +%Y%m%d-%H%M%S)"
 fi
 ```
 
@@ -60,9 +60,9 @@ fi
 ```bash
 # Execute main update script
 if [[ "$DRY_RUN" == true ]]; then
-    ./.claude/scripts/pm/update.sh --dry-run
+    .claude/scripts/pm/update.sh --dry-run
 else
-    ./.claude/scripts/pm/update.sh
+    .claude/scripts/pm/update.sh
 fi
 ```
 
@@ -81,7 +81,7 @@ echo "Run '/pm:status' to verify everything is working"
 ```bash
 if [[ -n "$ROLLBACK" ]]; then
     echo "🔄 Rolling back to backup: $ROLLBACK"
-    ./.claude/scripts/pm/update-restore.sh "$ROLLBACK"
+    .claude/scripts/pm/update-restore.sh "$ROLLBACK"
     exit $?
 fi
 ```

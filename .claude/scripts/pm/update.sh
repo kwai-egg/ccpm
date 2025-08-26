@@ -8,9 +8,10 @@ set -u  # Error on undefined variables
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(pwd)"
-CONFIG_FILE="$PROJECT_ROOT/.claude/.claude-pm.yaml"
-VERSION_FILE="$PROJECT_ROOT/.claude/VERSION"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CLAUDE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+CONFIG_FILE="$CLAUDE_DIR/.claude-pm.yaml"
+VERSION_FILE="$CLAUDE_DIR/VERSION"
 
 # Parse command line arguments
 DRY_RUN=false
@@ -181,7 +182,7 @@ function apply_file_updates() {
     local error_count=0
     
     # Create temporary backup directory for this update
-    local temp_backup_dir=".ccpm-backups/temp-$(date -u +%Y%m%d-%H%M%S)"
+    local temp_backup_dir="$CLAUDE_DIR/.ccpm-backups/temp-$(date -u +%Y%m%d-%H%M%S)"
     mkdir -p "$temp_backup_dir"
     
     # Process each file
@@ -276,21 +277,15 @@ function update_root_files() {
     done
 }
 
-# Sync .gitignore with configuration
+# Sync .gitignore with configuration (disabled for standalone .claude operation)
 function sync_gitignore() {
     if [[ "$DRY_RUN" == true ]]; then
-        dry_run_info "Would synchronize .gitignore with .claude/.claude-pm.yaml"
+        dry_run_info "Skipping .gitignore sync (standalone .claude mode)"
         return
     fi
     
-    info "Synchronizing .gitignore with configuration..."
-    
-    # Run the gitignore sync script
-    if [[ -x "$SCRIPT_DIR/gitignore-sync.sh" ]]; then
-        "$SCRIPT_DIR/gitignore-sync.sh" || warning "Failed to sync .gitignore (non-critical)"
-    else
-        warning "gitignore-sync.sh script not found or not executable"
-    fi
+    info "Skipping .gitignore sync (standalone .claude mode)..."
+    # Note: When running from .claude directory, we don't modify root .gitignore
 }
 
 # Validate update
@@ -358,7 +353,6 @@ function main() {
     create_backup
     apply_file_updates
     update_root_files
-    sync_gitignore
     validate_update
     show_summary
 }

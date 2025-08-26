@@ -8,9 +8,10 @@ set -u  # Error on undefined variables
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
-CONFIG_FILE="$PROJECT_ROOT/.claude/.claude-pm.yaml"
-VERSION_FILE="$PROJECT_ROOT/.claude/VERSION"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CLAUDE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+CONFIG_FILE="$CLAUDE_DIR/.claude-pm.yaml"
+VERSION_FILE="$CLAUDE_DIR/VERSION"
 
 # Parse command line arguments
 DRY_RUN=false
