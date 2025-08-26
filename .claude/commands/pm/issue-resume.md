@@ -62,7 +62,7 @@ spawn_capacity=$(echo "$capacity_info" | grep "spawn_capacity:" | cut -d':' -f2)
 if [ "$spawn_capacity" -lt 1 ]; then
   echo "⚠️  WARNING: Low memory capacity (can spawn $spawn_capacity agents)"
   echo "Current memory usage:"
-  .claude/scripts/pm/memory-monitor.sh usage | grep "Usage:"
+  ~/.claude/scripts/pm/memory-monitor.sh usage | grep "Usage:"
   echo ""
   read -p "Continue with resume anyway? (y/N): " confirm
   if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
@@ -137,7 +137,7 @@ resumed: $resume_time" "$stream_file"
   rm "${stream_file}.bak" 2>/dev/null || true
   
   # Track agent spawn in coordination system
-  .claude/scripts/pm/coordination-memory.sh "$epic_name" spawn "$stream_id"
+  ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" spawn "$stream_id"
   
   # Relaunch the agent with resume context
   Task:
@@ -234,7 +234,7 @@ resumed: $resume_time" "$stream_file"
     rm "${stream_file}.bak" 2>/dev/null || true
     
     # Track spawn
-    .claude/scripts/pm/coordination-memory.sh "$epic_name" spawn "$stream"
+    ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" spawn "$stream"
     
     # Launch agent (simplified for batch resume)
     agent_type=$(grep "^agent:" "$stream_file" | cut -d':' -f2 | xargs)

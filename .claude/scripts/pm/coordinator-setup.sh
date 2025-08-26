@@ -7,7 +7,7 @@ set -e
 set -u
 
 ACTION="${1:-apply}"
-ENV_SCRIPT=".claude/scripts/pm/memory-env.sh"
+ENV_SCRIPT="~/.claude/scripts/pm/memory-env.sh"
 COORDINATOR_ENV=".claude/env/coordinator.env"
 
 # Function to apply coordinator environment
@@ -101,7 +101,7 @@ function reset_coordinator_env() {
 
 # Function to create startup script for coordinator
 function create_startup_script() {
-    local startup_script=".claude/scripts/pm/start-coordinator.sh"
+    local startup_script="~/.claude/scripts/pm/start-coordinator.sh"
     
     cat > "$startup_script" << 'EOF'
 #!/bin/bash
@@ -111,7 +111,7 @@ function create_startup_script() {
 echo "Starting Claude Code PM Coordinator with memory optimization..."
 
 # Apply coordinator environment
-if [ -f ".claude/scripts/pm/coordinator-setup.sh" ]; then
+if [ -f "~/.claude/scripts/pm/coordinator-setup.sh" ]; then
     source .claude/scripts/pm/coordinator-setup.sh apply
 else
     echo "❌ Coordinator setup script not found"
@@ -119,19 +119,19 @@ else
 fi
 
 # Initialize memory monitoring
-if [ -f ".claude/scripts/pm/memory-monitor.sh" ]; then
+if [ -f "~/.claude/scripts/pm/memory-monitor.sh" ]; then
     echo "Current system memory status:"
     .claude/scripts/pm/memory-monitor.sh usage
     echo ""
 fi
 
 # Initialize agent pool
-if [ -f ".claude/scripts/pm/agent-pool.sh" ]; then
+if [ -f "~/.claude/scripts/pm/agent-pool.sh" ]; then
     .claude/scripts/pm/agent-pool.sh init
 fi
 
 # Initialize memory feedback system
-if [ -f ".claude/scripts/pm/memory-feedback.sh" ]; then
+if [ -f "~/.claude/scripts/pm/memory-feedback.sh" ]; then
     .claude/scripts/pm/memory-feedback.sh init
 fi
 

@@ -67,7 +67,7 @@ update:
   - ".claude/agents/"
   - ".claude/commands/"
   - "~/.claude/rules/"
-  - ".claude/scripts/"
+  - "~/.claude/scripts/"
   - ".claude/templates/"
   - ".claude/VERSION"
   - ".claude/CHANGELOG.md"
@@ -81,7 +81,7 @@ merge_strategy:
     - ".claude/agents/**"
     - ".claude/commands/**"
     - "~/.claude/rules/**"
-    - ".claude/scripts/**"
+    - "~/.claude/scripts/**"
     - ".claude/VERSION"
     - ".claude/CHANGELOG.md"
   ours:
@@ -190,7 +190,7 @@ echo ""
 echo "🔍 Running initial system check..."
 
 # Check for available updates
-.claude/scripts/pm/update-check.sh || true
+~/.claude/scripts/pm/update-check.sh || true
 
 echo ""
 echo "✅ Update system initialization complete!"

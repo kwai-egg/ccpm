@@ -15,7 +15,7 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
   - Garbage collection and memory efficiency settings
 
 ### 2. Memory Monitoring System
-- **Script**: `.claude/scripts/pm/memory-monitor.sh`
+- **Script**: `~/.claude/scripts/pm/memory-monitor.sh`
 - **Capabilities**:
   - Real-time system memory assessment
   - Spawn capacity calculation based on available memory
@@ -23,7 +23,7 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
   - Cross-platform support (macOS/Linux)
 
 ### 3. Memory-Aware Coordination
-- **Script**: `.claude/scripts/pm/coordination-memory.sh`
+- **Script**: `~/.claude/scripts/pm/coordination-memory.sh`
 - **Features**:
   - Pre-spawn memory assessment
   - Dynamic stream batching
@@ -41,7 +41,7 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
   - Multi-batch execution support
 
 ### 5. Environment Management
-- **Script**: `.claude/scripts/pm/memory-env.sh`
+- **Script**: `~/.claude/scripts/pm/memory-env.sh`
 - **Environment Files**: 
   - `.claude/env/coordinator.env` (16GB heap)
   - `.claude/env/agent.env` (8GB heap)
@@ -51,7 +51,7 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
   - Role-based memory allocation
 
 ### 6. Memory-Based Retry Logic
-- **Script**: `.claude/scripts/pm/memory-retry.sh`
+- **Script**: `~/.claude/scripts/pm/memory-retry.sh`
 - **Capabilities**:
   - Detection of memory-related failures
   - Memory-optimized retry configuration (50% heap reduction)
@@ -59,7 +59,7 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
   - Retry statistics and pattern analysis
 
 ### 7. Feedback Loop System
-- **Script**: `.claude/scripts/pm/memory-feedback.sh`
+- **Script**: `~/.claude/scripts/pm/memory-feedback.sh`
 - **Features**:
   - Historical pattern recording
   - Configuration recommendations based on usage
@@ -67,7 +67,7 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
   - Optimal batch size suggestions
 
 ### 8. Agent Process Pooling
-- **Script**: `.claude/scripts/pm/agent-pool.sh`
+- **Script**: `~/.claude/scripts/pm/agent-pool.sh`
 - **Implementation**:
   - Agent lifecycle management
   - Memory efficiency tracking
@@ -75,8 +75,8 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
   - Resource cleanup coordination
 
 ### 9. Coordinator Setup System
-- **Script**: `.claude/scripts/pm/coordinator-setup.sh`
-- **Startup Script**: `.claude/scripts/pm/start-coordinator.sh`
+- **Script**: `~/.claude/scripts/pm/coordinator-setup.sh`
+- **Startup Script**: `~/.claude/scripts/pm/start-coordinator.sh`
 - **Features**:
   - Coordinator environment configuration
   - System validation and health checks
@@ -117,22 +117,22 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
 
 ### Start Memory-Optimized Coordinator
 ```bash
-source .claude/scripts/pm/start-coordinator.sh
+source ~/.claude/scripts/pm/start-coordinator.sh
 ```
 
 ### Check System Memory Capacity
 ```bash
-.claude/scripts/pm/memory-monitor.sh check
+~/.claude/scripts/pm/memory-monitor.sh check
 ```
 
 ### Monitor Memory Usage During Execution
 ```bash
-.claude/scripts/pm/coordination-memory.sh epic-name monitor
+~/.claude/scripts/pm/coordination-memory.sh epic-name monitor
 ```
 
 ### Analyze Memory Patterns and Get Recommendations
 ```bash
-.claude/scripts/pm/memory-feedback.sh recommend
+~/.claude/scripts/pm/memory-feedback.sh recommend
 ```
 
 ## Integration with Existing System

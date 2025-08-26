@@ -146,7 +146,7 @@ Bash:
       echo "Issue #$issue_num monitoring:"
       
       # Show memory usage
-      .claude/scripts/pm/memory-monitor.sh usage | grep -E "Usage:|Available Memory:"
+      ~/.claude/scripts/pm/memory-monitor.sh usage | grep -E "Usage:|Available Memory:"
       echo ""
       
       # Show active agents

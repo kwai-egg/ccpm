@@ -86,7 +86,7 @@ if [ "$stream_id" != "all" ]; then
     echo "ℹ️  Stream $stream_id not found in active agents (may already be stopped)"
   else
     # Use coordination-memory.sh to kill the stream
-    .claude/scripts/pm/coordination-memory.sh "$epic_name" kill "$stream_id"
+    ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" kill "$stream_id"
     
     # Find and kill any background processes related to this stream
     # Look for processes with stream ID or issue number
@@ -94,7 +94,7 @@ if [ "$stream_id" != "all" ]; then
     pkill -f "stream.*$stream_id.*issue.*$ARGUMENTS" 2>/dev/null || true
     
     # Update coordination tracking
-    .claude/scripts/pm/coordination-memory.sh "$epic_name" complete "$stream_id" "killed"
+    ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" complete "$stream_id" "killed"
   fi
   
   # Update stream status file if it exists
@@ -156,8 +156,8 @@ if [ "$stream_id" = "all" ]; then
       echo "  Killing stream $stream..."
       
       # Use coordination-memory.sh to kill each stream
-      .claude/scripts/pm/coordination-memory.sh "$epic_name" kill "$stream"
-      .claude/scripts/pm/coordination-memory.sh "$epic_name" complete "$stream" "killed"
+      ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" kill "$stream"
+      ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" complete "$stream" "killed"
       
       # Update stream status file
       stream_file=".claude/epics/$epic_name/updates/$ARGUMENTS/stream-$stream.md"
@@ -181,7 +181,7 @@ killed: $kill_time" "$stream_file"
     
     # Force memory cleanup
     echo "  Performing memory cleanup..."
-    .claude/scripts/pm/coordination-memory.sh "$epic_name" cleanup
+    ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" cleanup
     
     # Log the emergency kill
     echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] EMERGENCY KILL: $killed_count streams killed by user request" >> "$coordination_dir/memory-log.md"
@@ -198,17 +198,17 @@ echo ""
 echo "🧹 Performing post-kill cleanup..."
 
 # Force memory cleanup
-.claude/scripts/pm/memory-monitor.sh cleanup 2>/dev/null || true
+~/.claude/scripts/pm/memory-monitor.sh cleanup 2>/dev/null || true
 
 # Clean up coordination tracking
-.claude/scripts/pm/coordination-memory.sh "$epic_name" cleanup
+~/.claude/scripts/pm/coordination-memory.sh "$epic_name" cleanup
 
 # Show memory recovery
 sleep 2
 echo ""
 echo "📋 Post-Kill Status:"
 
-current_memory=$(.claude/scripts/pm/memory-monitor.sh usage | grep "Usage:" | cut -d':' -f2 | xargs)
+current_memory=$(~/.claude/scripts/pm/memory-monitor.sh usage | grep "Usage:" | cut -d':' -f2 | xargs)
 echo "  Current memory usage: $current_memory"
 
 # Count remaining active agents
@@ -287,7 +287,7 @@ else
 fi
 
 # Verify memory cleanup
-memory_after=$(.claude/scripts/pm/memory-monitor.sh usage | grep "Usage:" | cut -d':' -f2 | sed 's/%//')
+memory_after=$(~/.claude/scripts/pm/memory-monitor.sh usage | grep "Usage:" | cut -d':' -f2 | sed 's/%//')
 if [ "$memory_after" -lt 85 ]; then
   echo "✅ Memory usage is normal ($memory_after%)"
 else

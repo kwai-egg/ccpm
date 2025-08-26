@@ -101,7 +101,7 @@ author: Claude Code PM System
 ### Shell Scripts (.sh)
 - **Purpose**: Automation and utility operations
 - **Standard**: Bash-compatible shell scripts
-- **Location**: `.claude/scripts/` directory
+- **Location**: `~/.claude/scripts/` directory
 - **Pattern**: Descriptive names, error handling, documentation headers
 
 ## Integration Points
@@ -153,7 +153,7 @@ author: Claude Code PM System
 ### Access Control
 - **GitHub Authentication**: Secure token-based auth via gh CLI
 - **File Permissions**: Standard file system permissions
-- **Script Execution**: Only trusted scripts in `.claude/scripts/`
+- **Script Execution**: Only trusted scripts in `~/.claude/scripts/`
 - **Input Validation**: Parameter validation in all commands
 
 ### Data Handling

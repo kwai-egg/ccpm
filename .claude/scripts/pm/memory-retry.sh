@@ -11,8 +11,8 @@ ACTION="$2"
 STREAM_ID="${3:-}"
 
 COORDINATION_DIR=".claude/epics/$EPIC_NAME/coordination"
-MEMORY_SCRIPT=".claude/scripts/pm/memory-monitor.sh"
-MEMORY_COORD_SCRIPT=".claude/scripts/pm/coordination-memory.sh"
+MEMORY_SCRIPT="~/.claude/scripts/pm/memory-monitor.sh"
+MEMORY_COORD_SCRIPT="~/.claude/scripts/pm/coordination-memory.sh"
 
 # Function to log retry events
 function log_retry_event() {

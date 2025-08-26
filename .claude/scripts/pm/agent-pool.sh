@@ -9,7 +9,7 @@ set -u
 ACTION="$1"
 EPIC_NAME="${2:-}"
 POOL_DIR=".claude/agent-pool"
-MEMORY_SCRIPT=".claude/scripts/pm/memory-monitor.sh"
+MEMORY_SCRIPT="~/.claude/scripts/pm/memory-monitor.sh"
 
 # Function to initialize agent pool
 function init_pool() {

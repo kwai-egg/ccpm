@@ -208,4 +208,4 @@ No specific configuration required. Uses existing:
 - `/pm:update` - Create updates (automatically creates backups)
 - `/pm:update-check` - Check if rollback is needed
 - `/pm:validate` - Verify system after rollback
-- `.claude/scripts/pm/update-restore.sh` - Low-level restore script
+- `~/.claude/scripts/pm/update-restore.sh` - Low-level restore script

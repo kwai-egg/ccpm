@@ -78,7 +78,7 @@ if [ "$stream_id" != "all" ]; then
   echo "⏸️  Pausing Stream $stream_id for Issue #$ARGUMENTS"
   
   # Use coordination-memory.sh to pause the stream
-  .claude/scripts/pm/coordination-memory.sh "$epic_name" pause "$stream_id"
+  ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" pause "$stream_id"
   
   # Update stream status file if it exists
   stream_file=".claude/epics/$epic_name/updates/$ARGUMENTS/stream-$stream_id.md"
@@ -147,7 +147,7 @@ if [ "$stream_id" = "all" ]; then
     echo "  Pausing stream $stream..."
     
     # Use coordination-memory.sh to pause each stream
-    .claude/scripts/pm/coordination-memory.sh "$epic_name" pause "$stream"
+    ~/.claude/scripts/pm/coordination-memory.sh "$epic_name" pause "$stream"
     
     # Update stream status file if it exists
     stream_file=".claude/epics/$epic_name/updates/$ARGUMENTS/stream-$stream.md"

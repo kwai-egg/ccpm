@@ -52,9 +52,9 @@ monitoring_session="monitor_${ARGUMENTS}_$(date +%s)"
 bash -c "
 while true; do
   echo '=== $(date -u +\"%Y-%m-%dT%H:%M:%SZ\") ==='
-  .claude/scripts/pm/coordination-memory.sh \"$epic_name\" monitor
+  ~/.claude/scripts/pm/coordination-memory.sh \"$epic_name\" monitor
   echo ''
-  .claude/scripts/pm/memory-monitor.sh usage
+  ~/.claude/scripts/pm/memory-monitor.sh usage
   echo ''
   sleep 5
 done
@@ -101,7 +101,7 @@ fi
 
 # Show memory status
 echo "💾 System Memory:"
-.claude/scripts/pm/memory-monitor.sh usage
+~/.claude/scripts/pm/memory-monitor.sh usage
 echo ""
 
 # Show recent coordination events
@@ -205,7 +205,7 @@ echo "  Active agents: $active_count"
 echo "  Completed agents: $completed_count"
 
 # Show memory usage
-current_memory=$(.claude/scripts/pm/memory-monitor.sh usage | grep "Usage:" | cut -d':' -f2 | xargs)
+current_memory=$(~/.claude/scripts/pm/memory-monitor.sh usage | grep "Usage:" | cut -d':' -f2 | xargs)
 echo "  Current memory usage: $current_memory"
 
 # Show worktree status

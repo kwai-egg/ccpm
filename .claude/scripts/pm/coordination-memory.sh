@@ -11,7 +11,7 @@ ACTION="$2"
 STREAM_COUNT="${3:-0}"
 
 COORDINATION_DIR=".claude/epics/$EPIC_NAME/coordination"
-MEMORY_SCRIPT=".claude/scripts/pm/memory-monitor.sh"
+MEMORY_SCRIPT="~/.claude/scripts/pm/memory-monitor.sh"
 
 # Function to log coordination events
 function log_event() {

@@ -52,7 +52,7 @@ fi
 # Create backup unless --no-backup specified
 if [[ "$NO_BACKUP" != true && "$DRY_RUN" != true ]]; then
     echo "🔄 Creating backup before update..."
-    .claude/scripts/pm/update-backup.sh "update-$(date -u +%Y%m%d-%H%M%S)"
+    ~/.claude/scripts/pm/update-backup.sh "update-$(date -u +%Y%m%d-%H%M%S)"
 fi
 ```
 
@@ -60,9 +60,9 @@ fi
 ```bash
 # Execute main update script
 if [[ "$DRY_RUN" == true ]]; then
-    .claude/scripts/pm/update.sh --dry-run
+    ~/.claude/scripts/pm/update.sh --dry-run
 else
-    .claude/scripts/pm/update.sh
+    ~/.claude/scripts/pm/update.sh
 fi
 ```
 
@@ -81,7 +81,7 @@ echo "Run '/pm:status' to verify everything is working"
 ```bash
 if [[ -n "$ROLLBACK" ]]; then
     echo "🔄 Rolling back to backup: $ROLLBACK"
-    .claude/scripts/pm/update-restore.sh "$ROLLBACK"
+    ~/.claude/scripts/pm/update-restore.sh "$ROLLBACK"
     exit $?
 fi
 ```
@@ -175,7 +175,7 @@ preserve:
 update:
   - ".claude/agents/"     # System components
   - ".claude/commands/"
-  - ".claude/scripts/"
+  - "~/.claude/scripts/"
 
 backup:
   enabled: true

@@ -82,7 +82,7 @@ components=(
     ".claude/commands:Commands"
     ".claude/context:Context System"
     ".claude/rules:Rules"
-    ".claude/scripts:Scripts"
+    "~/.claude/scripts:Scripts"
 )
 
 for component in "${components[@]}"; do
@@ -131,7 +131,7 @@ if [[ "$HEALTH" == true ]]; then
         ".claude/VERSION:Version file"
         ".claude/commands/pm:PM commands"
         ".claude/agents:Agent definitions"
-        ".claude/scripts/pm:PM scripts"
+        "~/.claude/scripts/pm:PM scripts"
     )
     
     for check in "${critical_files[@]}"; do
