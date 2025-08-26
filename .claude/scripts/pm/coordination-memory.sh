@@ -66,14 +66,35 @@ function assess_memory_capacity() {
 # Function to track agent spawn
 function track_agent_spawn() {
     local stream_id="$1"
+    local process_id="${4:-}"  # Optional process ID
+    local shell_id="${5:-}"   # Optional shell ID for background processes
     local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     
     echo "stream_id:$stream_id" >> "$COORDINATION_DIR/active-agents.log"
     echo "spawn_time:$timestamp" >> "$COORDINATION_DIR/active-agents.log"
     echo "status:spawned" >> "$COORDINATION_DIR/active-agents.log"
+    
+    # Add process tracking if provided
+    if [ -n "$process_id" ]; then
+        echo "process_id:$process_id" >> "$COORDINATION_DIR/active-agents.log"
+    fi
+    
+    if [ -n "$shell_id" ]; then
+        echo "shell_id:$shell_id" >> "$COORDINATION_DIR/active-agents.log"
+    fi
+    
+    # Try to detect current process ID if not provided
+    if [ -z "$process_id" ]; then
+        # Look for recent processes related to this stream
+        recent_pid=$(pgrep -f "stream.*$stream_id" 2>/dev/null | tail -1)
+        if [ -n "$recent_pid" ]; then
+            echo "detected_pid:$recent_pid" >> "$COORDINATION_DIR/active-agents.log"
+        fi
+    fi
+    
     echo "---" >> "$COORDINATION_DIR/active-agents.log"
     
-    log_event "Agent spawned for stream: $stream_id"
+    log_event "Agent spawned for stream: $stream_id (PID: ${process_id:-auto-detect}, Shell: ${shell_id:-none})"
 }
 
 # Function to track agent completion
@@ -196,6 +217,198 @@ function calculate_batch_size() {
     log_event "Calculated batching: $total_streams streams -> $batches batches of $spawn_capacity"
 }
 
+# Function to pause an agent stream
+function pause_agent_stream() {
+    local stream_id="$1"
+    
+    # First try to get tracked PIDs from coordination log
+    local tracked_pids=""
+    if [ -f "$COORDINATION_DIR/active-agents.log" ]; then
+        tracked_pids=$(awk -v stream="$stream_id" '
+            /^stream_id:/ { 
+                if (substr($0, 11) == stream) {
+                    in_target = 1
+                } else {
+                    in_target = 0
+                }
+                next
+            }
+            in_target && /^process_id:/ {
+                print substr($0, 12)
+                next
+            }
+            in_target && /^detected_pid:/ {
+                print substr($0, 13)
+                next
+            }
+            in_target && /^---$/ {
+                in_target = 0
+                next
+            }
+        ' "$COORDINATION_DIR/active-agents.log")
+    fi
+    
+    # Fall back to process search if no tracked PIDs
+    if [ -z "$tracked_pids" ]; then
+        tracked_pids=$(pgrep -f "stream.*$stream_id" 2>/dev/null || true)
+    fi
+    
+    if [ -n "$tracked_pids" ]; then
+        echo "process_control:pause"
+        echo "stream_id:$stream_id"
+        echo "pids_found:$(echo "$tracked_pids" | wc -w)"
+        
+        # Send STOP signal to pause the processes
+        for pid in $tracked_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill -STOP "$pid" 2>/dev/null && echo "paused_pid:$pid" || echo "failed_pause_pid:$pid"
+            else
+                echo "dead_pid:$pid"
+            fi
+        done
+        
+        log_event "PAUSE: Stream $stream_id paused (PIDs: $tracked_pids)"
+        echo "status:paused"
+    else
+        echo "process_control:pause"
+        echo "stream_id:$stream_id"
+        echo "pids_found:0"
+        echo "status:no_process_found"
+        log_event "PAUSE: No active processes found for stream $stream_id"
+    fi
+}
+
+# Function to resume an agent stream
+function resume_agent_stream() {
+    local stream_id="$1"
+    
+    # First try to get tracked PIDs from coordination log
+    local tracked_pids=""
+    if [ -f "$COORDINATION_DIR/active-agents.log" ]; then
+        tracked_pids=$(awk -v stream="$stream_id" '
+            /^stream_id:/ { 
+                if (substr($0, 11) == stream) {
+                    in_target = 1
+                } else {
+                    in_target = 0
+                }
+                next
+            }
+            in_target && /^process_id:/ {
+                print substr($0, 12)
+                next
+            }
+            in_target && /^detected_pid:/ {
+                print substr($0, 13)
+                next
+            }
+            in_target && /^---$/ {
+                in_target = 0
+                next
+            }
+        ' "$COORDINATION_DIR/active-agents.log")
+    fi
+    
+    # Fall back to process search if no tracked PIDs
+    if [ -z "$tracked_pids" ]; then
+        tracked_pids=$(pgrep -f "stream.*$stream_id" 2>/dev/null || true)
+    fi
+    
+    if [ -n "$tracked_pids" ]; then
+        echo "process_control:resume"
+        echo "stream_id:$stream_id"
+        echo "pids_found:$(echo "$tracked_pids" | wc -w)"
+        
+        # Send CONT signal to resume the processes
+        for pid in $tracked_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                kill -CONT "$pid" 2>/dev/null && echo "resumed_pid:$pid" || echo "failed_resume_pid:$pid"
+            else
+                echo "dead_pid:$pid"
+            fi
+        done
+        
+        log_event "RESUME: Stream $stream_id resumed (PIDs: $tracked_pids)"
+        echo "status:resumed"
+    else
+        echo "process_control:resume"
+        echo "stream_id:$stream_id"
+        echo "pids_found:0"
+        echo "status:no_process_found"
+        log_event "RESUME: No processes found for stream $stream_id"
+    fi
+}
+
+# Function to kill an agent stream
+function kill_agent_stream() {
+    local stream_id="$1"
+    
+    # First try to get tracked PIDs from coordination log
+    local tracked_pids=""
+    if [ -f "$COORDINATION_DIR/active-agents.log" ]; then
+        tracked_pids=$(awk -v stream="$stream_id" '
+            /^stream_id:/ { 
+                if (substr($0, 11) == stream) {
+                    in_target = 1
+                } else {
+                    in_target = 0
+                }
+                next
+            }
+            in_target && /^process_id:/ {
+                print substr($0, 12)
+                next
+            }
+            in_target && /^detected_pid:/ {
+                print substr($0, 13)
+                next
+            }
+            in_target && /^---$/ {
+                in_target = 0
+                next
+            }
+        ' "$COORDINATION_DIR/active-agents.log")
+    fi
+    
+    # Fall back to process search if no tracked PIDs
+    if [ -z "$tracked_pids" ]; then
+        tracked_pids=$(pgrep -f "stream.*$stream_id" 2>/dev/null || true)
+    fi
+    
+    if [ -n "$tracked_pids" ]; then
+        echo "process_control:kill"
+        echo "stream_id:$stream_id"
+        echo "pids_found:$(echo "$tracked_pids" | wc -w)"
+        
+        # Send TERM signal first, then KILL if needed
+        for pid in $tracked_pids; do
+            if kill -0 "$pid" 2>/dev/null; then
+                echo "terminating_pid:$pid"
+                kill -TERM "$pid" 2>/dev/null || true
+                sleep 1
+                # If still running, force kill
+                if kill -0 "$pid" 2>/dev/null; then
+                    echo "force_killing_pid:$pid"
+                    kill -KILL "$pid" 2>/dev/null || true
+                else
+                    echo "terminated_pid:$pid"
+                fi
+            else
+                echo "already_dead_pid:$pid"
+            fi
+        done
+        
+        log_event "KILL: Stream $stream_id terminated (PIDs: $tracked_pids)"
+        echo "status:killed"
+    else
+        echo "process_control:kill"
+        echo "stream_id:$stream_id"
+        echo "pids_found:0"
+        echo "status:no_process_found"
+        log_event "KILL: No active processes found for stream $stream_id"
+    fi
+}
+
 # Main execution
 function main() {
     # Ensure coordination directory exists
@@ -227,6 +440,15 @@ function main() {
         "batch")
             calculate_batch_size "$STREAM_COUNT"
             ;;
+        "pause")
+            pause_agent_stream "$STREAM_COUNT"  # STREAM_COUNT is stream_id in this case
+            ;;
+        "resume")
+            resume_agent_stream "$STREAM_COUNT"  # STREAM_COUNT is stream_id in this case
+            ;;
+        "kill")
+            kill_agent_stream "$STREAM_COUNT"  # STREAM_COUNT is stream_id in this case
+            ;;
         *)
             echo "Usage: $0 <epic-name> <action> [stream-count/stream-id]"
             echo ""
@@ -237,6 +459,9 @@ function main() {
             echo "  monitor - Monitor current memory usage"
             echo "  cleanup - Force memory cleanup"
             echo "  batch   - Calculate dynamic batch size"
+            echo "  pause   - Pause agent stream (stream-id required)"
+            echo "  resume  - Resume agent stream (stream-id required)"
+            echo "  kill    - Kill agent stream (stream-id required)"
             exit 1
             ;;
     esac

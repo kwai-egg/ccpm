@@ -123,14 +123,91 @@ Task:
     Complete your stream's work and mark as completed when done.
 ```
 
-### 5. GitHub Assignment
+### 5. Launch Background Monitoring
+
+Start automatic monitoring for the parallel agents:
+
+```bash
+# Launch background monitoring using BashOutput
+monitoring_session="monitor_${ARGUMENTS}_$(date +%s)"
+
+# Start continuous monitoring in background
+Bash:
+  description: "Start background monitoring for issue $ARGUMENTS"
+  command: |
+    # Create monitoring script
+    cat > "/tmp/issue_${ARGUMENTS}_monitor.sh" << 'MONITOR_EOF'
+    #!/bin/bash
+    epic_name="$1"
+    issue_num="$2"
+    
+    while true; do
+      echo "=== $(date -u +"%Y-%m-%dT%H:%M:%SZ") ==="
+      echo "Issue #$issue_num monitoring:"
+      
+      # Show memory usage
+      .claude/scripts/pm/memory-monitor.sh usage | grep -E "Usage:|Available Memory:"
+      echo ""
+      
+      # Show active agents
+      coordination_dir=".claude/epics/$epic_name/coordination"
+      if [ -f "$coordination_dir/active-agents.log" ]; then
+        echo "Active Agents:"
+        awk '
+          /^stream_id:/ { 
+            stream = substr($0, 11)
+            in_stream = 1
+            next
+          }
+          in_stream && /^status:/ { 
+            status = substr($0, 8)
+            printf "  Stream %s: %s\n", stream, status
+            next
+          }
+          in_stream && /^---$/ {
+            in_stream = 0
+            next
+          }
+        ' "$coordination_dir/active-agents.log"
+      else
+        echo "  No active agents found"
+      fi
+      echo ""
+      
+      # Check for high memory usage
+      current_usage=$(.claude/scripts/pm/memory-monitor.sh usage | grep "Usage:" | sed 's/.*Usage: //' | sed 's/%//')
+      if [ "$current_usage" -gt 85 ]; then
+        echo "⚠️  HIGH MEMORY WARNING: ${current_usage}% usage"
+        echo ""
+      fi
+      
+      sleep 10
+    done
+    MONITOR_EOF
+    
+    chmod +x "/tmp/issue_${ARGUMENTS}_monitor.sh"
+    "/tmp/issue_${ARGUMENTS}_monitor.sh" "$epic_name" "$ARGUMENTS" > "/tmp/issue_${ARGUMENTS}_monitor.log" 2>&1
+  run_in_background: true
+  timeout: 0
+
+# Store the monitoring session info
+monitoring_pid=$!
+echo "monitoring_session:$monitoring_session" >> "$coordination_dir/monitoring.log"
+echo "monitoring_pid:$monitoring_pid" >> "$coordination_dir/monitoring.log"
+echo "started:$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$coordination_dir/monitoring.log"
+echo "issue:$ARGUMENTS" >> "$coordination_dir/monitoring.log"
+echo "log_file:/tmp/issue_${ARGUMENTS}_monitor.log" >> "$coordination_dir/monitoring.log"
+echo "---" >> "$coordination_dir/monitoring.log"
+```
+
+### 6. GitHub Assignment
 
 ```bash
 # Assign to self and mark in-progress
 gh issue edit $ARGUMENTS --add-assignee @me --add-label "in-progress"
 ```
 
-### 6. Output
+### 7. Output
 
 ```
 ✅ Started parallel work on issue #$ARGUMENTS
@@ -143,11 +220,23 @@ Launching {count} parallel agents:
   Stream B: {name} (Agent-2) ✓ Started
   Stream C: {name} - Waiting (depends on A)
 
+🔍 Background monitoring started:
+  Monitor log: /tmp/issue_{$ARGUMENTS}_monitor.log
+  Session: {monitoring_session}
+
 Progress tracking:
   .claude/epics/{epic_name}/updates/$ARGUMENTS/
 
-Monitor with: /pm:epic-status {epic_name}
-Sync updates: /pm:issue-sync $ARGUMENTS
+Real-time commands:
+  /pm:issue-monitor $ARGUMENTS           - View live monitoring
+  /pm:issue-pause $ARGUMENTS <stream>    - Pause runaway stream
+  /pm:issue-kill $ARGUMENTS <stream>     - Kill problematic stream
+
+Status commands:
+  /pm:epic-status {epic_name}            - Epic overview
+  /pm:issue-sync $ARGUMENTS              - Sync updates to GitHub
+
+Background monitoring will continue automatically. Check /tmp/issue_{$ARGUMENTS}_monitor.log for real-time updates.
 ```
 
 ## Error Handling

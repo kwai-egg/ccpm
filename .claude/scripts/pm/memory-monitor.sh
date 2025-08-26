@@ -152,6 +152,63 @@ function cleanup_memory() {
     echo "Memory cleanup completed"
 }
 
+# Function for continuous monitoring mode
+function continuous_monitoring() {
+    local interval="${2:-5}"  # Default 5 second interval
+    
+    echo "Starting continuous memory monitoring (interval: ${interval}s)"
+    echo "Press Ctrl+C to stop"
+    echo ""
+    
+    # Cleanup function for continuous mode
+    cleanup_continuous() {
+        echo ""
+        echo "Stopping continuous monitoring..."
+        exit 0
+    }
+    
+    # Set trap for cleanup
+    trap cleanup_continuous INT TERM
+    
+    while true; do
+        echo "=== $(date -u +"%Y-%m-%dT%H:%M:%SZ") ==="
+        
+        # Show memory usage
+        get_memory_usage
+        echo ""
+        
+        # Show spawn capacity
+        echo "Spawn Capacity:"
+        check_spawn_capacity | grep -E "(spawn_capacity|running_agents|memory_enabled)" | sed 's/^/  /'
+        echo ""
+        
+        sleep "$interval"
+    done
+}
+
+# Function for daemon monitoring mode (for background processes)
+function daemon_monitoring() {
+    local interval="${2:-10}"  # Default 10 second interval for daemon
+    local log_file="${3:-/tmp/memory-monitor-daemon.log}"
+    
+    # Run in background, logging to file
+    while true; do
+        {
+            echo "=== $(date -u +"%Y-%m-%dT%H:%M:%SZ") ==="
+            get_memory_usage
+            echo ""
+            check_spawn_capacity | grep -E "(spawn_capacity|running_agents|available_memory)" | sed 's/^/  /'
+            echo ""
+        } >> "$log_file"
+        
+        sleep "$interval"
+    done &
+    
+    echo "daemon_pid:$!"
+    echo "log_file:$log_file"
+    echo "interval:${interval}s"
+}
+
 # Main execution
 function main() {
     local command="${1:-check}"
@@ -169,14 +226,22 @@ function main() {
         "cleanup")
             cleanup_memory
             ;;
+        "continuous")
+            continuous_monitoring "$@"
+            ;;
+        "daemon")
+            daemon_monitoring "$@"
+            ;;
         *)
-            echo "Usage: $0 [check|usage|limits|cleanup]"
+            echo "Usage: $0 [check|usage|limits|cleanup|continuous|daemon]"
             echo ""
             echo "Commands:"
-            echo "  check   - Check current spawn capacity based on memory"
-            echo "  usage   - Show current memory usage"
-            echo "  limits  - Show configured memory limits"
-            echo "  cleanup - Perform memory cleanup operations"
+            echo "  check      - Check current spawn capacity based on memory"
+            echo "  usage      - Show current memory usage"
+            echo "  limits     - Show configured memory limits"
+            echo "  cleanup    - Perform memory cleanup operations"
+            echo "  continuous - Continuous monitoring (interactive)"
+            echo "  daemon     - Background daemon monitoring"
             exit 1
             ;;
     esac
