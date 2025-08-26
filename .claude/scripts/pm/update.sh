@@ -194,7 +194,12 @@ function apply_file_updates() {
     while IFS= read -r remote_file; do
         [[ -z "$remote_file" ]] && continue
         
+        # Map remote file path to local file path
+        # If we're in .claude directory and remote_file starts with .claude/, strip that prefix
         local local_file="$remote_file"
+        if [[ "$INSTALLATION_TYPE" == "global" ]] && [[ "$remote_file" == .claude/* ]]; then
+            local_file="${remote_file#.claude/}"
+        fi
         local action="skip"
         
         # Determine what to do with this file
