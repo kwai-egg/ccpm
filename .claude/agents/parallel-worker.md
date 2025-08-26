@@ -24,13 +24,13 @@ Before spawning agents, assess system capacity and plan execution:
 **Step 1: Memory Assessment**
 ```bash
 # Check memory capacity for spawning
-bash .claude/scripts/pm/coordination-memory.sh {epic_name} assess {total_streams}
+bash ~/.claude/scripts/pm/coordination-memory.sh {epic_name} assess {total_streams}
 ```
 
 **Step 2: Dynamic Batching**
 ```bash
 # Calculate optimal batch size
-bash .claude/scripts/pm/coordination-memory.sh {epic_name} batch {total_streams}
+bash ~/.claude/scripts/pm/coordination-memory.sh {epic_name} batch {total_streams}
 ```
 
 **Step 3: Spawn Sub-Agents**
@@ -73,7 +73,7 @@ Task:
     Do NOT return code snippets or detailed explanations.
 
     After completion, this agent will be tracked via:
-    bash .claude/scripts/pm/coordination-memory.sh {epic_name} complete {stream_id} {status}
+    bash ~/.claude/scripts/pm/coordination-memory.sh {epic_name} complete {stream_id} {status}
 ```
 
 ### 3.5 Recovery Sub-Agent Prompt (NEW)
@@ -247,7 +247,7 @@ When a sub-agent fails:
 2. Extract specific details about what was blocked
 3. Create coordination status file:
    ```bash
-   bash .claude/scripts/pm/coordination-block.sh \
+   bash ~/.claude/scripts/pm/coordination-block.sh \
      {epic} {stream} "permission_denied" \
      "{attempted_action}" "{error_details}"
    ```
