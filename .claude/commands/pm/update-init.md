@@ -66,7 +66,7 @@ preserve:
 update:
   - ".claude/agents/"
   - ".claude/commands/"
-  - ".claude/rules/"
+  - "~/.claude/rules/"
   - ".claude/scripts/"
   - ".claude/templates/"
   - ".claude/VERSION"
@@ -80,7 +80,7 @@ merge_strategy:
   theirs:
     - ".claude/agents/**"
     - ".claude/commands/**"
-    - ".claude/rules/**"
+    - "~/.claude/rules/**"
     - ".claude/scripts/**"
     - ".claude/VERSION"
     - ".claude/CHANGELOG.md"

@@ -199,7 +199,7 @@ author: Claude Code PM System
 - Include error handling and user feedback
 
 ### Adding New Rules
-- Create rule file in `.claude/rules/`
+- Create rule file in `~/.claude/rules/`
 - Define operational guidelines and constraints
 - Reference from relevant commands and agents
 - Maintain consistency with existing patterns

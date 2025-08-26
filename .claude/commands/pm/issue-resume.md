@@ -162,7 +162,7 @@ resumed: $resume_time" "$stream_file"
       3. Work ONLY on your assigned files and scope
       4. Commit frequently with format: "Issue #$ARGUMENTS: {specific change} (resumed)"
       5. Update progress in: .claude/epics/$epic_name/updates/$ARGUMENTS/stream-$stream_id.md
-      6. Follow coordination rules in .claude/rules/agent-coordination.md
+      6. Follow coordination rules in ~/.claude/rules/agent-coordination.md
       
       If you find the work was already completed during the pause:
       - Mark the stream as completed

@@ -95,7 +95,7 @@ preserve:
 update:
   - ".claude/agents/"          # AI agent definitions
   - ".claude/commands/"        # Command specifications and implementations
-  - ".claude/rules/"           # System operation rules and patterns
+  - "~/.claude/rules/"           # System operation rules and patterns
   - ".claude/scripts/"         # Automation and utility scripts
   - ".claude/templates/"       # Content templates and patterns
   - ".claude/VERSION"          # Version tracking

@@ -91,7 +91,7 @@ This command parses the `.claude-pm.yaml` file and automatically manages a dedic
 📝 Added to .gitignore:
   - .claude/agents/
   - .claude/commands/
-  - .claude/rules/
+  - ~/.claude/rules/
   - .claude/scripts/
   - .claude/templates/
   - .claude/VERSION
@@ -110,7 +110,7 @@ dist/
 # Managed by .claude/scripts/pm/gitignore-sync.sh
 .claude/agents/
 .claude/commands/
-.claude/rules/
+~/.claude/rules/
 .claude/scripts/
 .claude/templates/
 .claude/VERSION

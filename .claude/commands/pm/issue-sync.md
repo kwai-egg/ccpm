@@ -14,7 +14,7 @@ Push local updates as GitHub issue comments for transparent audit trail.
 ## Required Rules
 
 **IMPORTANT:** Before executing this command, read and follow:
-- `.claude/rules/datetime.md` - For getting real current date/time
+- `~/.claude/rules/datetime.md` - For getting real current date/time
 
 ## Preflight Checklist
 

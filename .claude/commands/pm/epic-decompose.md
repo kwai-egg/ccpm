@@ -14,7 +14,7 @@ Break epic into concrete, actionable tasks.
 ## Required Rules
 
 **IMPORTANT:** Before executing this command, read and follow:
-- `.claude/rules/datetime.md` - For getting real current date/time
+- `~/.claude/rules/datetime.md` - For getting real current date/time
 
 ## Preflight Checklist
 
