@@ -113,7 +113,7 @@ Task:
     2. Work ONLY in your assigned files
     3. Commit frequently with format: "Issue #$ARGUMENTS: {specific change}"
     4. Update progress in: .claude/epics/{epic_name}/updates/$ARGUMENTS/stream-{X}.md
-    5. Follow coordination rules in /rules/agent-coordination.md
+    5. Follow coordination rules in ~/.claude/rules/agent-coordination.md
     
     If you need to modify files outside your scope:
     - Check if another stream owns them

@@ -117,8 +117,7 @@ Task:
     - .claude/epics/$ARGUMENTS/{task_file}
     - .claude/epics/$ARGUMENTS/{issue}-analysis.md
 
-    Follow coordination rules in /rules/agent-coordination.md
-
+    Follow coordination rules in ~/.claude/rules/agent-coordination.md
     Commit frequently with message format:
     "Issue #{issue}: {specific change}"
 
