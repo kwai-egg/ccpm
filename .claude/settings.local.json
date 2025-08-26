@@ -37,7 +37,8 @@
       "Bash(bash:*)",
       "Bash(tree:*)",
       "Bash(source:*)",
-      "Bash(init_github_utils \"https://github.com/kwai-egg/ccpm.git\" \"main\")"
+      "Bash(init_github_utils \"https://github.com/kwai-egg/ccpm.git\" \"main\")",
+      "Bash(/Users/emg/ccpm/.claude/scripts/pm/gitignore-sync.sh)"
     ]
   }
 }

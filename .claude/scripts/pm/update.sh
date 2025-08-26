@@ -276,6 +276,23 @@ function update_root_files() {
     done
 }
 
+# Sync .gitignore with configuration
+function sync_gitignore() {
+    if [[ "$DRY_RUN" == true ]]; then
+        dry_run_info "Would synchronize .gitignore with .claude-pm.yaml"
+        return
+    fi
+    
+    info "Synchronizing .gitignore with configuration..."
+    
+    # Run the gitignore sync script
+    if [[ -x "$SCRIPT_DIR/gitignore-sync.sh" ]]; then
+        "$SCRIPT_DIR/gitignore-sync.sh" || warning "Failed to sync .gitignore (non-critical)"
+    else
+        warning "gitignore-sync.sh script not found or not executable"
+    fi
+}
+
 # Validate update
 function validate_update() {
     if [[ "$DRY_RUN" == true ]]; then
@@ -341,6 +358,7 @@ function main() {
     create_backup
     apply_file_updates
     update_root_files
+    sync_gitignore
     validate_update
     show_summary
 }

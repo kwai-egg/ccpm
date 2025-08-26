@@ -3,3 +3,21 @@
 # Claude Code PM Update System
 .ccpm-backups/
 .claude/.last-update-check
+# === Claude Code PM (auto-managed) ===
+# DO NOT EDIT THIS SECTION MANUALLY
+# Managed by .claude/scripts/pm/gitignore-sync.sh
+.claude/agents/         
+.claude/CHANGELOG.md    
+.claude/commands/       
+.claude/rules/          
+.claude/scripts/        
+.claude/templates/      
+.claude/VERSION         
+.ccpm-backups/
+.claude/.last-update-check
+# === End Claude Code PM ===
+
+
+# Some custom entries
+temp/
+*.log
