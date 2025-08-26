@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Determine script location and source path resolver
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/path-resolver.sh" ]]; then
+    source "$SCRIPT_DIR/path-resolver.sh"
+else
+    # Fallback if path-resolver.sh doesn't exist
+    INSTALLATION_TYPE="project"
+    CLAUDE_DIR=".claude"
+    PROJECT_ROOT="$(pwd)"
+fi
+
 echo "Initializing..."
 echo ""
 echo ""
@@ -23,6 +34,14 @@ echo "======================================"
 echo ""
 
 # Check for required tools
+# Show installation type
+if [[ "$INSTALLATION_TYPE" == "global" ]]; then
+    echo "🌐 Using global ccpm installation from: $CLAUDE_DIR"
+else
+    echo "📦 Using project-local installation"
+fi
+echo ""
+
 echo "🔍 Checking dependencies..."
 
 # Check gh CLI
@@ -66,15 +85,53 @@ fi
 # Create directory structure
 echo ""
 echo "📁 Creating directory structure..."
-mkdir -p .claude/prds
-mkdir -p .claude/epics
-mkdir -p .claude/rules
-mkdir -p .claude/agents
-mkdir -p .claude/scripts/pm
-echo "  ✅ Directories created"
 
-# Copy scripts if in main repo
-if [ -d "scripts/pm" ] && [ ! "$(pwd)" = *"/.claude"* ]; then
+# Determine if we should create locally or skip (for global install)
+if [[ "$INSTALLATION_TYPE" == "global" ]]; then
+    if [[ ! -d "./.claude" ]]; then
+        echo "  📥 Creating local project .claude directory..."
+        mkdir -p .claude/prds
+        mkdir -p .claude/epics
+        mkdir -p .claude/rules
+        mkdir -p .claude/context
+        
+        # Create .claude-pm.yaml for the project
+        if [[ ! -f ".claude/.claude-pm.yaml" ]]; then
+            cat > .claude/.claude-pm.yaml << 'EOF'
+# Claude Code PM configuration for this project
+upstream: https://github.com/automazeio/ccpm.git
+branch: main
+version: 1.0.0
+
+# Files to preserve during updates
+preserve:
+  - prds
+  - epics
+  - context
+  - rules/project-*.md
+EOF
+            echo "  ✅ Created project configuration"
+        fi
+        
+        echo "  ✅ Local directories created"
+    else
+        echo "  ✅ Local .claude directory already exists"
+    fi
+else
+    mkdir -p .claude/prds
+    mkdir -p .claude/epics
+    mkdir -p .claude/rules
+    mkdir -p .claude/agents
+    mkdir -p .claude/scripts/pm
+    echo "  ✅ Directories created"
+fi
+
+# Handle script copying based on installation type
+if [[ "$INSTALLATION_TYPE" == "global" ]]; then
+  echo ""
+  echo "📝 Using global PM scripts from: $CLAUDE_DIR/scripts/pm/"
+  echo "  ✅ No copying needed for global installation"
+elif [ -d "scripts/pm" ] && [ ! "$(pwd)" = *"/.claude"* ]; then
   echo ""
   echo "📝 Copying PM scripts..."
   cp -r scripts/pm/* .claude/scripts/pm/
@@ -137,9 +194,15 @@ echo "  Extensions: $(gh extension list | wc -l) installed"
 echo "  Auth: $(gh auth status 2>&1 | grep -o 'Logged in to [^ ]*' || echo 'Not authenticated')"
 echo ""
 echo "🎯 Next Steps:"
-echo "  1. Create your first PRD: /pm:prd-new <feature-name>"
-echo "  2. View help: /pm:help"
-echo "  3. Check status: /pm:status"
+if [[ "$INSTALLATION_TYPE" == "global" ]]; then
+  echo "  1. Create your first PRD: ccpm prd-new <feature-name>"
+  echo "  2. View help: ccpm help"
+  echo "  3. Check status: ccpm status"
+else
+  echo "  1. Create your first PRD: /pm:prd-new <feature-name>"
+  echo "  2. View help: /pm:help"
+  echo "  3. Check status: /pm:status"
+fi
 echo ""
 echo "📚 Documentation: README.md"
 

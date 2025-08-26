@@ -8,8 +8,13 @@ set -u  # Error on undefined variables
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-CLAUDE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Source path resolver for flexible path handling
+source "$SCRIPT_DIR/path-resolver.sh"
+
+# Use resolved paths
+PROJECT_ROOT="$PROJECT_ROOT"  # From path-resolver.sh
+CLAUDE_DIR="$CLAUDE_DIR"      # From path-resolver.sh
 CONFIG_FILE="$CLAUDE_DIR/.claude-pm.yaml"
 VERSION_FILE="$CLAUDE_DIR/VERSION"
 
@@ -44,9 +49,9 @@ source "$SCRIPT_DIR/github-utils.sh"
 
 # Validate environment
 function validate_environment() {
-    # Check if .claude directory exists
-    if [[ ! -d "$PROJECT_ROOT/.claude" ]]; then
-        error_exit "Claude Code PM not found (.claude directory missing)"
+    # Check if .claude directory exists (either local or global)
+    if [[ ! -d "$CLAUDE_DIR" ]]; then
+        error_exit "Claude Code PM not found (.claude directory missing at $CLAUDE_DIR)"
     fi
 
     # Check for uncommitted git changes if in a git repo (optional warning)
@@ -298,7 +303,7 @@ function validate_update() {
     info "Validating update..."
     
     # Check critical files exist
-    local critical_files=(".claude/VERSION" ".claude/commands" ".claude/agents")
+    local critical_files=("$CLAUDE_DIR/VERSION" "$CLAUDE_DIR/commands" "$CLAUDE_DIR/agents")
     for file in "${critical_files[@]}"; do
         if [[ ! -e "$file" ]]; then
             error_exit "Critical file/directory missing after update: $file"
@@ -330,7 +335,8 @@ function show_summary() {
     
     if [[ -n "${BACKUP_NAME:-}" ]]; then
         info "Backup created: $BACKUP_NAME"
-        info "To rollback: ./.claude/scripts/pm/update-restore.sh $BACKUP_NAME"
+        local restore_script="$(resolve_script 'pm/update-restore.sh' || echo '$CLAUDE_DIR/scripts/pm/update-restore.sh')"
+        info "To rollback: $restore_script $BACKUP_NAME"
     fi
     
     info "\nNext steps:"

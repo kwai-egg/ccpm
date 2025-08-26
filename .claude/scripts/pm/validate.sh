@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Determine script location and source path resolver
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/path-resolver.sh" 2>/dev/null || true
+
 echo "Validating PM System..."
 echo ""
 echo ""
@@ -13,10 +17,25 @@ warnings=0
 
 # Check directory structure
 echo "📁 Directory Structure:"
-[ -d ".claude" ] && echo "  ✅ .claude directory exists" || { echo "  ❌ .claude directory missing"; ((errors++)); }
-[ -d ".claude/prds" ] && echo "  ✅ PRDs directory exists" || echo "  ⚠️ PRDs directory missing"
-[ -d ".claude/epics" ] && echo "  ✅ Epics directory exists" || echo "  ⚠️ Epics directory missing"
-[ -d ".claude/rules" ] && echo "  ✅ Rules directory exists" || echo "  ⚠️ Rules directory missing"
+
+if [[ "$INSTALLATION_TYPE" == "global" ]]; then
+    echo "  ℹ️  Running from global installation: $CLAUDE_DIR"
+    [ -d "$CLAUDE_DIR" ] && echo "  ✅ Global .claude directory exists" || { echo "  ❌ Global .claude directory missing"; ((errors++)); }
+    
+    # Check for local project directories
+    if [ -d ".claude" ]; then
+        echo "  ✅ Local .claude directory exists"
+        [ -d ".claude/prds" ] && echo "  ✅ PRDs directory exists" || echo "  ⚠️ PRDs directory missing"
+        [ -d ".claude/epics" ] && echo "  ✅ Epics directory exists" || echo "  ⚠️ Epics directory missing"
+    else
+        echo "  ℹ️  No local .claude directory (using global)"
+    fi
+else
+    [ -d ".claude" ] && echo "  ✅ .claude directory exists" || { echo "  ❌ .claude directory missing"; ((errors++)); }
+    [ -d ".claude/prds" ] && echo "  ✅ PRDs directory exists" || echo "  ⚠️ PRDs directory missing"
+    [ -d ".claude/epics" ] && echo "  ✅ Epics directory exists" || echo "  ⚠️ Epics directory missing"
+    [ -d ".claude/rules" ] && echo "  ✅ Rules directory exists" || echo "  ⚠️ Rules directory missing"
+fi
 echo ""
 
 # Check for orphaned files
