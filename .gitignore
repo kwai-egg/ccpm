@@ -1,5 +1,5 @@
 .DS_Store
-
+.vscode/*
 # Claude Code PM Update System
 .ccpm-backups/
 .claude/.last-update-check
