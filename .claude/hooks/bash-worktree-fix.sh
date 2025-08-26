@@ -96,7 +96,8 @@ should_skip_command() {
 
     # Empty or whitespace-only?
     # If there are no non-space characters, skip.
-    if [ -z "${cmd##*[![:space:]]*}" ]; then
+    trimmed_cmd="$(printf '%s' "$cmd" | sed 's/[[:space:]]//g')"
+    if [ -z "$trimmed_cmd" ]; then
         debug_log "Skipping: empty/whitespace-only command"
         return 0
     fi

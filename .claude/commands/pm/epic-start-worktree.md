@@ -93,19 +93,20 @@ Task:
     Working in worktree: ../epic-$ARGUMENTS/
     Issue: #{issue} - {title}
     Stream: {stream_name}
-    
+
     Your scope:
     - Files: {file_patterns}
     - Work: {stream_description}
-    
+
     Read full requirements from:
     - .claude/epics/$ARGUMENTS/{task_file}
     - .claude/epics/$ARGUMENTS/{issue}-analysis.md
 
     Follow coordination rules in ~/.claude/rules/agent-coordination.md
+
     Commit frequently with message format:
     "Issue #{issue}: {specific change}"
-    
+
     Update progress in:
     .claude/epics/$ARGUMENTS/updates/{issue}/stream-{X}.md
 ```
@@ -198,7 +199,7 @@ If agent launch fails:
   Issue: #{issue}
   Stream: {stream}
   Error: {reason}
-  
+
 Continue with other agents? (yes/no)
 ```
 
@@ -206,7 +207,7 @@ If worktree creation fails:
 ```
 ❌ Cannot create worktree
   {git error message}
-  
+
 Try: git worktree prune
 Or: Check existing worktrees with: git worktree list
 ```
