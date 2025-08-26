@@ -96,8 +96,8 @@ if [[ "$INSTALLATION_TYPE" == "global" ]]; then
         mkdir -p .claude/context
         
         # Create .claude-pm.yaml for the project
-        if [[ ! -f ".claude/.claude-pm.yaml" ]]; then
-            cat > .claude/.claude-pm.yaml << 'EOF'
+        if [[ ! -f "~/.claude/.claude-pm.yaml" ]]; then
+            cat > ~/.claude/.claude-pm.yaml << 'EOF'
 # Claude Code PM configuration for this project
 upstream: https://github.com/automazeio/ccpm.git
 branch: main

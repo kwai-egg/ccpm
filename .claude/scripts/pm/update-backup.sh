@@ -186,7 +186,7 @@ EOF
     fi
     
     # Backup configuration files
-    for config_file in ".claude/.claude-pm.yaml" "CLAUDE.md"; do
+    for config_file in "~/.claude/.claude-pm.yaml" "CLAUDE.md"; do
         if [[ -f "$config_file" ]]; then
             info "Backing up config: $config_file"
             cp "$config_file" "$backup_path/"

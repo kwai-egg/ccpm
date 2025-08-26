@@ -6,7 +6,7 @@ Successfully implemented a comprehensive memory-optimized parallel execution sys
 ## Core Components Implemented
 
 ### 1. Memory Management Configuration
-- **File**: `.claude/.claude-pm.yaml`
+- **File**: `~/.claude/.claude-pm.yaml`
 - **Features**:
   - Configurable limits for concurrent agents (default: 8)
   - Memory allocation per agent (8GB default)

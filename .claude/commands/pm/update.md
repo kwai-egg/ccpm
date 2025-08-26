@@ -23,7 +23,7 @@ Updates the Claude Code PM system to the latest version while preserving all pro
 # Note: No longer forcing cd to git root - scripts handle their own path resolution
 
 # Verify configuration exists
-test -f ".claude/.claude-pm.yaml" || error "Configuration file missing. Run '/pm:init' first"
+test -f "~/.claude/.claude-pm.yaml" || error "Configuration file missing. Run '/pm:init' first"
 
 # Check for uncommitted changes (unless --force used)
 if [[ "$FORCE" != true ]] && ! git diff-index --quiet HEAD --; then

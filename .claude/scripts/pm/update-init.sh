@@ -231,10 +231,10 @@ function show_instructions() {
     info "4. For help with update commands:"
     info "   /pm:help | grep update"
     info ""
-    info "📝 Configuration saved to: .claude/.claude-pm.yaml"
+    info "📝 Configuration saved to: ~/.claude/.claude-pm.yaml"
     info "💾 Backups will be stored in: .ccpm-backups/"
     info ""
-    info "🔧 To customize settings, edit .claude/.claude-pm.yaml"
+    info "🔧 To customize settings, edit ~/.claude/.claude-pm.yaml"
     info "🔗 Upstream: $UPSTREAM (branch: $BRANCH)"
 }
 
