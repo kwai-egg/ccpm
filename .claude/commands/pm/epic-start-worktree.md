@@ -44,9 +44,11 @@ else
   echo "✅ Using existing worktree: ../epic-$ARGUMENTS"
 fi
 
-# Setup dependencies for the worktree
+# Setup dependencies and environment for the worktree
 if [ -f "package.json" ]; then
+  echo "🔧 Setting up project-scoped cached dependencies..."
   bash ~/.claude/scripts/pm/setup-worktree-deps.sh "../epic-$ARGUMENTS"
+  echo "✅ Worktree ready with dependencies and environment variables"
 fi
 ```
 

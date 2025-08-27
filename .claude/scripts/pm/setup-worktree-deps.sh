@@ -79,19 +79,40 @@ find_main_repo() {
     get_abs_path "$main_repo"
 }
 
-# Setup symlink for a specific worktree
-setup_worktree_symlink() {
+# Setup cached dependencies for a specific worktree
+setup_worktree_dependencies() {
     local worktree_path="$1"
     local main_repo="$2"
     
-    debug_log "Setting up symlink for worktree: $worktree_path"
+    debug_log "Setting up cached dependencies for worktree: $worktree_path"
     debug_log "Main repo: $main_repo"
     
     # Check if main repo has package.json
     if [[ ! -f "$main_repo/package.json" ]]; then
-        debug_log "No package.json in main repo, skipping"
+        debug_log "No package.json in main repo, skipping dependency setup"
         return 0
     fi
+    
+    # Use the dependency cache system
+    info_log "Setting up project-scoped cached dependencies..."
+    if bash ~/.claude/scripts/pm/dependency-cache.sh setup "$main_repo" "$worktree_path"; then
+        info_log "✅ Dependencies setup complete using cache system"
+        return 0
+    else
+        error_log "Failed to setup cached dependencies"
+        
+        # Fallback to old symlink method if cache fails
+        info_log "Falling back to direct symlink method..."
+        setup_worktree_symlink_fallback "$worktree_path" "$main_repo"
+    fi
+}
+
+# Fallback symlink method (original implementation)
+setup_worktree_symlink_fallback() {
+    local worktree_path="$1"
+    local main_repo="$2"
+    
+    debug_log "Using fallback symlink method"
     
     # Check if main repo has node_modules
     if [[ ! -d "$main_repo/node_modules" ]]; then
@@ -129,7 +150,7 @@ setup_worktree_symlink() {
     
     # Create the symlink
     ln -s "$main_node_modules" "$worktree_node_modules"
-    info_log "✅ Created symlink: $worktree_node_modules -> $main_node_modules"
+    info_log "✅ Created fallback symlink: $worktree_node_modules -> $main_node_modules"
 }
 
 main() {
@@ -163,8 +184,8 @@ main() {
     
     debug_log "Main repository: $main_repo"
     
-    # Setup the node_modules symlink
-    setup_worktree_symlink "$target_path" "$main_repo"
+    # Setup the cached dependencies
+    setup_worktree_dependencies "$target_path" "$main_repo"
     
     # Setup environment variable symlinks
     info_log "Setting up environment variables..."
