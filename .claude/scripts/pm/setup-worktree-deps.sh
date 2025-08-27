@@ -163,8 +163,12 @@ main() {
     
     debug_log "Main repository: $main_repo"
     
-    # Setup the symlink
+    # Setup the node_modules symlink
     setup_worktree_symlink "$target_path" "$main_repo"
+    
+    # Setup environment variable symlinks
+    info_log "Setting up environment variables..."
+    bash ~/.claude/scripts/pm/setup-worktree-env.sh "$target_path" "$main_repo"
 }
 
 # Only run main if script is executed directly
