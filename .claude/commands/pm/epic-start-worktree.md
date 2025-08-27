@@ -43,6 +43,11 @@ if ! git worktree list | grep -q "epic-$ARGUMENTS"; then
 else
   echo "✅ Using existing worktree: ../epic-$ARGUMENTS"
 fi
+
+# Setup dependencies for the worktree
+if [ -f "package.json" ]; then
+  bash ~/.claude/scripts/pm/setup-worktree-deps.sh "../epic-$ARGUMENTS"
+fi
 ```
 
 ### 2. Identify Ready Issues
