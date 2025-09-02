@@ -7,7 +7,7 @@
           {
             "type": "command",
             "command":
-".claude/hooks/bash-worktree-fix.sh"
+"~/.claude/hooks/bash-worktree-fix.sh"
           }
         ]
       }
