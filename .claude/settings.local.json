@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:github.com)",
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "mcp__serena__find_symbol",
+      "mcp__serena__activate_project"
     ],
     "deny": [],
     "ask": []
