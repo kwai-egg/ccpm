@@ -1,6 +1,6 @@
 # Agent Coordination
 
-Rules for multiple agents working in parallel within the same epic worktree.
+Rules for multiple agents working in parallel within the same project directory and git branch.
 
 ## Parallel Execution Principles
 
@@ -199,11 +199,12 @@ git commit -m "Issue #1235: Use new types"
 
 ### Starting Work
 ```bash
-1. cd ../epic-{name}
+1. cd {project_directory} # Ensure in correct project directory
 2. git pull
 3. Check {issue}-analysis.md for assignment
 4. Update stream-{X}.md with "started"
-5. Begin work on assigned files
+5. use context7 for current documentation and best practices
+6. Begin work on assigned files
 ```
 
 ### During Work

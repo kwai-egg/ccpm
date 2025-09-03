@@ -12,9 +12,10 @@ This file provides guidance for recovering from a blocked stream during parallel
 {Describe the alternative approach to take}
 
 ## Specific Instructions
-1. {Step-by-step guidance}
-2. {What to do instead}
-3. {What to skip}
+1. use context7 for current documentation and best practices
+2. {Step-by-step guidance}
+3. {What to do instead}
+4. {What to skip}
 
 ## Acceptable Outcomes
 - {What partial completion is acceptable}

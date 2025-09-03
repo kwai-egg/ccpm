@@ -97,32 +97,59 @@ Found {count} parallel streams:
   - Stream B: {description} (Agent-{id})
 
 Launching agents in branch: epic/$ARGUMENTS
+Working directory: $(pwd)
 ```
 
-Use Task tool to launch each stream:
+Use Task tool with parallel-worker to coordinate all streams:
 ```yaml
 Task:
-  description: "Issue #{issue} Stream {X}"
-  subagent_type: "{agent_type}"
+  description: "Epic Parallel Execution"
+  subagent_type: "parallel-worker"
   prompt: |
-    Working in branch: epic/$ARGUMENTS
-    Issue: #{issue} - {title}
-    Stream: {stream_name}
-
-    Your scope:
-    - Files: {file_patterns}
-    - Work: {stream_description}
-
-    Read full requirements from:
-    - .claude/epics/$ARGUMENTS/{task_file}
-    - .claude/epics/$ARGUMENTS/{issue}-analysis.md
-
-    Follow coordination rules in ~/.claude/rules/agent-coordination.md
-    Commit frequently with message format:
-    "Issue #{issue}: {specific change}"
-
-    Update progress in:
-    .claude/epics/$ARGUMENTS/updates/{issue}/stream-{X}.md
+    You are coordinating parallel execution for epic: $ARGUMENTS
+    Working directory: $(pwd)
+    Branch: epic/$ARGUMENTS
+    
+    Epic location: .claude/epics/$ARGUMENTS/
+    
+    CRITICAL: All sub-agents must work in directory: $(pwd)
+    
+    Your sub-agent prompts should include:
+    
+    ```yaml
+    Task:
+      description: "Issue #{issue} Stream {X}"
+      subagent_type: "general-purpose"
+      prompt: |
+        WORKING DIRECTORY: $(pwd)
+        IMPORTANT: cd $(pwd) before starting any work
+        
+        Issue: #{issue} - {title}
+        Branch: epic/$ARGUMENTS
+        Stream: {stream_name}
+        
+        Your implementation scope:
+        - Files: {file_patterns}
+        - Work: {stream_description}
+        
+        Instructions:
+        1. cd $(pwd) immediately 
+        2. Verify you're in the correct project directory
+        3. Read requirements from .claude/epics/$ARGUMENTS/{task_file}
+        4. Read analysis from .claude/epics/$ARGUMENTS/{issue}-analysis.md
+        5. use context7 for current documentation and best practices
+        6. Follow coordination rules in ~/.claude/rules/agent-coordination.md
+        7. Commit frequently: "Issue #{issue}: {specific change}"
+        8. Work ONLY on your assigned files
+        
+        Return:
+        - What you completed
+        - Files modified  
+        - Any blockers
+        - Current working directory (to verify)
+    ```
+    
+    Read epic requirements and coordinate parallel execution.
 ```
 
 ### 5. Track Active Agents

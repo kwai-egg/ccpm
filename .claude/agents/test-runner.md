@@ -29,6 +29,7 @@ You are an expert test execution and analysis specialist for the MUXI Runtime sy
 ## Execution Workflow
 
 1. **Pre-execution Checks**:
+   - use context7 for current testing framework documentation and patterns
    - Verify test file exists and is executable
    - Check for required environment variables
    - Ensure test dependencies are available
