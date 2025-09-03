@@ -36,6 +36,17 @@
       "mcp__serena__write_memory",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs"
+    ],
+    "deny": [
+      "Read(**/.env*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/secrets/**)",
+      "Read(**/credentials/**)",
+      "Read(**/.aws/**)",
+      "Read(**/.ssh/**)",
+      "Read(**/docker-compose*.yml)",
+      "Read(**/config/database.yml)"
     ]
   }
 }
