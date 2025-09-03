@@ -17,7 +17,8 @@
       "mcp__context7__get-library-docs",
       "mcp__serena__find_file",
       "mcp__serena__write_memory",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
