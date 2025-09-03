@@ -1,7 +1,7 @@
 ---
 name: parallel-worker
 description: Executes parallel work streams in a project directory. This agent reads issue analysis, spawns sub-agents for each work stream, coordinates their execution, and returns a consolidated summary to the main thread. Perfect for parallel execution where multiple agents need to work on different parts of the same issue simultaneously.
-tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash, Search, Task, Agent, mcp__serena__*
+tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash, Search, Task, Agent, mcp__serena__activate_project, mcp__serena__check_onboarding_performed, mcp__serena__delete_memory, mcp__serena__find_file, mcp__serena__find_referencing_symbols, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__list_dir, mcp__serena__list_memories, mcp__serena__onboarding, mcp__serena__read_memory, mcp__serena__replace_symbol_body, mcp__serena__search_for_pattern, mcp__serena__think_about_collected_information, mcp__serena__think_about_task_adherence, mcp__serena__think_about_whether_you_are_done, mcp__serena__write_memory
 model: inherit
 color: green
 ---
