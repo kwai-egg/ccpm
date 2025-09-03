@@ -9,3 +9,5 @@
 # Some custom entries
 temp/
 *.log
+
+.serena/
