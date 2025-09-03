@@ -1,7 +1,7 @@
 ---
 name: test-runner
 description: Use this agent when you need to run tests and analyze their results. This agent specializes in executing tests using the optimized test runner script, capturing comprehensive logs, and then performing deep analysis to surface key issues, failures, and actionable insights. The agent should be invoked after code changes that require validation, during debugging sessions when tests are failing, or when you need a comprehensive test health report. Examples: <example>Context: The user wants to run tests after implementing a new feature and understands any issues.user: "I've finished implementing the new authentication flow. Can you run the relevant tests and tell me if there are any problems?" assistant: "I'll use the test-runner agent to run the authentication tests and analyze the results for any issues."<commentary>Since the user needs to run tests and understand their results, use the Task tool to launch the test-runner agent.</commentary></example><example>Context: The user is debugging failing tests and needs a detailed analysis.user: "The workflow tests keep failing intermittently. Can you investigate?" assistant: "Let me use the test-runner agent to run the workflow tests multiple times and analyze the patterns in any failures."<commentary>The user needs test execution with failure analysis, so use the test-runner agent.</commentary></example>
-tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, Search, Task, Agent, mcp__serena__activate_project, mcp__serena__check_onboarding_performed, mcp__serena__delete_memory, mcp__serena__find_file, mcp__serena__find_referencing_symbols, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__list_dir, mcp__serena__list_memories, mcp__serena__onboarding, mcp__serena__read_memory, mcp__serena__replace_symbol_body, mcp__serena__search_for_pattern, mcp__serena__think_about_collected_information, mcp__serena__think_about_task_adherence, mcp__serena__think_about_whether_you_are_done, mcp__serena__write_memory
+tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, Search, Task, Agent, mcp__serena__activate_project, mcp__serena__check_onboarding_performed, mcp__serena__delete_memory, mcp__serena__find_file, mcp__serena__find_referencing_symbols, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__list_dir, mcp__serena__list_memories, mcp__serena__onboarding, mcp__serena__read_memory, mcp__serena__replace_symbol_body, mcp__serena__search_for_pattern, mcp__serena__think_about_collected_information, mcp__serena__think_about_task_adherence, mcp__serena__think_about_whether_you_are_done, mcp__serena__write_memory, mcp__sequential-thinking__sequentialthinking
 model: inherit
 color: blue
 ---
@@ -28,8 +28,12 @@ You are an expert test execution and analysis specialist for the MUXI Runtime sy
 
 ## Execution Workflow
 
+**Planning Phase**: use sequential-thinking for test strategy planning, failure analysis, and comprehensive test execution planning.
+
+**Serena Usage**: Leverage serena's semantic code tools to understand test structures and relationships efficiently. Use find_symbol to locate test functions, get_symbols_overview for test file analysis.
+
 1. **Pre-execution Checks**:
-   - use context7 for current testing framework documentation and patterns
+   - use context7 with 2000 tokens when planning test strategies for frameworks not exemplified in the current codebase
    - Verify test file exists and is executable
    - Check for required environment variables
    - Ensure test dependencies are available
