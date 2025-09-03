@@ -1,46 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(bash ~/.claude/scripts/test-and-log.sh:*)",
-      "Bash(~/.claude/scripts/test-and-log.sh:*)",
-      "Bash(bash ~/.claude/scripts/pm/*)",
-      "Bash(~/.claude/scripts/pm/*)",
-      "Bash(cat *)",
-      "Bash(cat:*)",
-      "Bash(composer *)",
-      "Bash(fi)",
-      "Bash(find *)",
-      "Bash(gh *)",
-      "Bash(git *)",
-      "Bash(grep *)",
-      "Bash(kill:*)",
-      "Bash(ln:*)",
-      "Bash(ls *)",
-      "Bash(mv *)",
-      "Bash(npm *)",
-      "Bash(npx *)",
-      "Bash(pnpm *)",
-      "Bash(pytest *)",
-      "Bash(python *)",
-      "Bash(rm *)",
-      "Bash(ruff check *)",
-      "Bash(ruff check:*)",
-      "Bash(sed *)",
-      "Bash(sed:*)",
-      "Bash(then)",
-      "Bash(touch *)",
-      "Bash(tree *)",
-      "List(**)",
       "WebFetch(domain:github.com)",
-      "WebSearch",
-      "Bash(chmod:*)",
-      "Bash(bash:*)",
-      "Bash(tree:*)",
-      "Bash(source:*)",
-      "Bash(init_github_utils \"https://github.com/kwai-egg/ccpm.git\" \"main\")",
-      "Bash(/Users/emg/ccpm/.claude/scripts/pm/gitignore-sync.sh)",
-      "Read(//Users/emg/.claude/**)",
-      "Bash(/Users/emg/ccpm/.claude/scripts/pm/memory-env.sh create-files:*)"
-    ]
+      "Bash(claude mcp:*)"
+    ],
+    "deny": [],
+    "ask": []
   }
 }
